@@ -27,14 +27,14 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize Go module with `go mod init github.com/yourorg/veo3-cli`
-- [ ] T002 Create directory structure per plan.md (cmd/, pkg/, internal/, tests/)
-- [ ] T003 [P] Create go.mod with initial dependencies (cobra, viper, google api client)
-- [ ] T004 [P] Create .gitignore for Go projects (binaries, vendor/, coverage files)
-- [ ] T005 [P] Create .golangci.yml with linter configuration (80% coverage threshold)
-- [ ] T006 [P] Create Makefile with build, test, lint, and install targets
-- [ ] T007 [P] Create README.md with installation and usage instructions
-- [ ] T008 [P] Create main.go entry point in cmd/veo3/main.go with Cobra root command
+- [x] T001 Initialize Go module with `go mod init github.com/yourorg/veo3-cli`
+- [x] T002 Create directory structure per plan.md (cmd/, pkg/, internal/, tests/)
+- [x] T003 [P] Create go.mod with initial dependencies (cobra, viper, google api client)
+- [x] T004 [P] Create .gitignore for Go projects (binaries, vendor/, coverage files)
+- [x] T005 [P] Create .golangci.yml with linter configuration (80% coverage threshold)
+- [x] T006 [P] Create Makefile with build, test, lint, and install targets
+- [x] T007 [P] Create README.md with installation and usage instructions
+- [x] T008 [P] Create main.go entry point in cmd/veo3/main.go with Cobra root command
 
 ---
 
@@ -44,18 +44,18 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T009 [P] Create pkg/config/config.go with Configuration struct from data-model.md
-- [ ] T010 [P] Create pkg/config/manager.go with config file load/save operations
-- [ ] T011 [P] Create pkg/config/defaults.go with default configuration values
-- [ ] T012 [P] Create internal/validation/files.go with image/video validation functions
-- [ ] T013 [P] Create internal/validation/params.go with parameter validation functions
-- [ ] T014 [P] Create pkg/veo3/client.go with Google API client wrapper and authentication
-- [ ] T015 [P] Create pkg/veo3/models.go with model registry and capabilities from data-model.md
-- [ ] T016 [P] Create pkg/operations/manager.go with operation lifecycle management
-- [ ] T017 [P] Create pkg/operations/poller.go with status polling and exponential backoff
-- [ ] T018 [P] Create pkg/operations/downloader.go with video download streaming
-- [ ] T019 [P] Create internal/format/output.go with human-readable output formatting
-- [ ] T020 [P] Create internal/format/json.go with JSON output formatting
+- [x] T009 [P] Create pkg/config/config.go with Configuration struct from data-model.md
+- [x] T010 [P] Create pkg/config/manager.go with config file load/save operations
+- [x] T011 [P] Create pkg/config/defaults.go with default configuration values
+- [x] T012 [P] Create internal/validation/files.go with image/video validation functions
+- [x] T013 [P] Create internal/validation/params.go with parameter validation functions
+- [x] T014 [P] Create pkg/veo3/client.go with Google API client wrapper and authentication
+- [x] T015 [P] Create pkg/veo3/models.go with model registry and capabilities from data-model.md
+- [x] T016 [P] Create pkg/operations/manager.go with operation lifecycle management
+- [x] T017 [P] Create pkg/operations/poller.go with status polling and exponential backoff
+- [x] T018 [P] Create pkg/operations/downloader.go with video download streaming
+- [x] T019 [P] Create internal/format/output.go with human-readable output formatting
+- [x] T020 [P] Create internal/format/json.go with JSON output formatting
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -336,7 +336,7 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T129 [P] Create comprehensive README.md with examples and troubleshooting
+- [x] T129 [P] Create comprehensive README.md with examples and troubleshooting
 - [ ] T130 [P] Generate man pages from Cobra documentation
 - [ ] T131 [P] Add shell completion generation (bash, zsh, fish)
 - [ ] T132 [P] Add --version command with build info (version, commit, build date)
@@ -345,8 +345,8 @@
 - [ ] T135 Performance profiling and optimization for large batch jobs
 - [ ] T136 [P] Security audit (API key handling, file permissions, input validation)
 - [ ] T137 Add quickstart.md validation by running examples from it
-- [ ] T138 [P] Create CONTRIBUTING.md with development setup instructions
-- [ ] T139 [P] Create LICENSE file (Apache 2.0 or MIT)
+- [x] T138 [P] Create CONTRIBUTING.md with development setup instructions
+- [x] T139 [P] Create LICENSE file (MIT)
 - [ ] T140 Final coverage report and ensure 80% threshold is met
 
 ---

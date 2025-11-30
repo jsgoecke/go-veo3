@@ -4,270 +4,126 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"image/jpeg"
-	"image/png"
-	"io"
+	_ "image/jpeg"
+	_ "image/png"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/jasongoecke/go-veo3/pkg/config"
-	"golang.org/x/image/webp"
+	_ "golang.org/x/image/webp"
 )
 
-// ValidateImageFile validates an image file for Veo compatibility
+const (
+	MaxImageSize     = 20 * 1024 * 1024 // 20MB
+	MaxVideoDuration = 141              // seconds (approx)
+)
+
+// ValidateImageFile checks if the file exists, is readable, is within size limits, and is a valid image
 func ValidateImageFile(path string) error {
 	info, err := os.Stat(path)
 	if err != nil {
-		return fmt.Errorf("file not found: %s", path)
+		if os.IsNotExist(err) {
+			return fmt.Errorf("image file not found: %s", path)
+		}
+		return fmt.Errorf("failed to check image file: %w", err)
 	}
 
-	if info.Size() > config.MaxImageSize {
-		return fmt.Errorf("image size %d exceeds limit of %d bytes", info.Size(), config.MaxImageSize)
+	if err := ValidateImageSize(info.Size()); err != nil {
+		return err
 	}
 
-	file, err := os.Open(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// Read magic bytes
-	header := make([]byte, 512)
-	if _, err := file.Read(header); err != nil {
-		return fmt.Errorf("failed to read file header: %w", err)
+		return fmt.Errorf("failed to read image file: %w", err)
 	}
 
-	// Reset file pointer
-	if _, err := file.Seek(0, 0); err != nil {
-		return err
+	// Validate image format by decoding config
+	_, format, err := image.DecodeConfig(bytes.NewReader(data))
+	if err != nil {
+		return fmt.Errorf("invalid image format: %w (supported: jpeg, png, webp)", err)
 	}
 
-	ext := strings.ToLower(filepath.Ext(path))
-	switch ext {
-	case ".png":
-		if _, err := png.DecodeConfig(file); err != nil {
-			return fmt.Errorf("invalid PNG file: %w", err)
-		}
-	case ".jpg", ".jpeg":
-		if _, err := jpeg.DecodeConfig(file); err != nil {
-			return fmt.Errorf("invalid JPEG file: %w", err)
-		}
-	case ".webp":
-		if _, err := webp.DecodeConfig(file); err != nil {
-			return fmt.Errorf("invalid WebP file: %w", err)
-		}
+	if !isValidFormat(format) {
+		return fmt.Errorf("unsupported image format: %s (supported: jpeg, png, webp)", format)
+	}
+
+	return nil
+}
+
+func isValidFormat(format string) bool {
+	switch strings.ToLower(format) {
+	case "jpeg", "jpg", "png", "webp":
+		return true
 	default:
-		return fmt.Errorf("unsupported image format: %s (must be .png, .jpg, .jpeg, or .webp)", ext)
+		return false
 	}
-
-	return nil
 }
 
-// ValidateVideoFile validates a video file for Veo extension compatibility
-func ValidateVideoFile(path string) error {
-	info, err := os.Stat(path)
-	if err != nil {
-		return fmt.Errorf("file not found: %s", path)
-	}
-
-	if info.IsDir() {
-		return fmt.Errorf("path is a directory: %s", path)
-	}
-
-	// Basic extension check
-	ext := strings.ToLower(filepath.Ext(path))
-	if ext != ".mp4" {
-		return fmt.Errorf("unsupported video format: %s (must be .mp4)", ext)
-	}
-
-	// Note: Detailed video validation (metadata, duration) would typically require ffmpeg
-	// or specific libraries. For now, we rely on API validation for deep checks.
-	// We could add basic header checks here if needed.
-
-	return nil
-}
-
-// ValidateImageDimensions checks if dimensions are compatible
-func ValidateImageDimensions(path1, path2 string) error {
-	img1, _, err := DecodeImageConfig(path1)
-	if err != nil {
-		return err
-	}
-
-	img2, _, err := DecodeImageConfig(path2)
-	if err != nil {
-		return err
-	}
-
-	if img1.Width != img2.Width || img1.Height != img2.Height {
-		return fmt.Errorf("image dimensions mismatch: %dx%d vs %dx%d", img1.Width, img1.Height, img2.Width, img2.Height)
-	}
-
-	return nil
-}
-
-func DecodeImageConfig(path string) (image.Config, string, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return image.Config{}, "", err
-	}
-	defer file.Close()
-
-	// Handle WebP specifically since image.DecodeConfig might not auto-detect it without import
-	ext := strings.ToLower(filepath.Ext(path))
-	if ext == ".webp" {
-		config, err := webp.DecodeConfig(file)
-		return config, ext, err
-	}
-
-	return image.DecodeConfig(file)
-}
-
-// ReadFileToBytes reads a file into a byte slice
-func ReadFileToBytes(path string) ([]byte, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var buf bytes.Buffer
-	if _, err := io.Copy(&buf, file); err != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
-}
-
-// ValidateImageFormat validates the image file format by extension
+// ValidateImageFormat checks if the file has a supported extension (simple check)
 func ValidateImageFormat(filename string) error {
-	if filename == "" {
-		return fmt.Errorf("filename cannot be empty")
-	}
-
 	ext := strings.ToLower(filepath.Ext(filename))
 	switch ext {
 	case ".jpg", ".jpeg", ".png", ".webp":
 		return nil
 	default:
-		return fmt.Errorf("unsupported image format: %s", ext)
+		return fmt.Errorf("unsupported image extension: %s", ext)
 	}
 }
 
-// ValidateImageSize validates the image file size
+// ValidateImageSize checks if file size is within limits
 func ValidateImageSize(size int64) error {
-	if size < 0 {
-		return fmt.Errorf("invalid file size: %d", size)
+	if size > MaxImageSize {
+		return fmt.Errorf("image file too large: %d bytes (max %d bytes)", size, MaxImageSize)
 	}
-
-	if size == 0 {
-		return fmt.Errorf("file is empty")
-	}
-
-	if size > config.MaxImageSize {
-		sizeMB := float64(size) / (1024 * 1024)
-		maxMB := float64(config.MaxImageSize) / (1024 * 1024)
-		return fmt.Errorf("file exceeds maximum size: %.1f MB (maximum: %.1f MB)", sizeMB, maxMB)
-	}
-
 	return nil
 }
 
-// ValidateInterpolationImages validates that two images are compatible for interpolation
-func ValidateInterpolationImages(firstPath, lastPath string) error {
-	// Check that paths are not empty
-	if firstPath == "" {
-		return fmt.Errorf("first frame path cannot be empty")
-	}
-	if lastPath == "" {
-		return fmt.Errorf("last frame path cannot be empty")
-	}
-
-	// Check that they're not the same file
-	if firstPath == lastPath {
-		return fmt.Errorf("first and last frame cannot be the same file")
-	}
-
-	// Validate both image files exist and are valid
-	if err := ValidateImageFile(firstPath); err != nil {
-		return fmt.Errorf("first frame validation failed: %w", err)
-	}
-
-	if err := ValidateImageFile(lastPath); err != nil {
-		return fmt.Errorf("last frame validation failed: %w", err)
-	}
-
-	// Check dimensions compatibility
-	config1, _, err := DecodeImageConfig(firstPath)
+// DecodeImageConfig decodes image configuration
+func DecodeImageConfig(path string) (image.Config, string, error) {
+	f, err := os.Open(path)
 	if err != nil {
-		return fmt.Errorf("cannot decode first frame: %w", err)
+		return image.Config{}, "", err
 	}
+	defer f.Close()
+	return image.DecodeConfig(f)
+}
 
-	config2, _, err := DecodeImageConfig(lastPath)
+// ValidateInterpolationImages checks two images for compatibility
+func ValidateInterpolationImages(path1, path2 string) error {
+	cfg1, _, err := DecodeImageConfig(path1)
 	if err != nil {
-		return fmt.Errorf("cannot decode last frame: %w", err)
+		return fmt.Errorf("failed to decode first image: %w", err)
+	}
+	cfg2, _, err := DecodeImageConfig(path2)
+	if err != nil {
+		return fmt.Errorf("failed to decode second image: %w", err)
 	}
 
-	if err := ValidateCompatibleDimensions(config1.Width, config1.Height, config2.Width, config2.Height); err != nil {
-		return fmt.Errorf("frame dimension mismatch: %w", err)
-	}
+	return ValidateCompatibleDimensions(cfg1.Width, cfg1.Height, cfg2.Width, cfg2.Height)
+}
 
+// ValidateCompatibleDimensions checks if dimensions match
+func ValidateCompatibleDimensions(w1, h1, w2, h2 int) error {
+	if w1 != w2 || h1 != h2 {
+		return fmt.Errorf("image dimensions mismatch: %dx%d vs %dx%d", w1, h1, w2, h2)
+	}
 	return nil
 }
 
-// ValidateVideoFileForExtension validates a video file for extension functionality
-func ValidateVideoFileForExtension(filePath string) error {
-	if filePath == "" {
-		return fmt.Errorf("video path cannot be empty")
-	}
-
-	// Check if file exists and get info
-	info, err := os.Stat(filePath)
+// ValidateVideoFileForExtension checks video file validity
+func ValidateVideoFileForExtension(path string) error {
+	info, err := os.Stat(path)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return fmt.Errorf("no such file: %s", filePath)
-		}
-		return fmt.Errorf("cannot access file: %w", err)
+		return err
 	}
-
-	// Check if it's a directory
+	// Basic check?
 	if info.IsDir() {
-		return fmt.Errorf("path is a directory, not a file: %s", filePath)
+		return fmt.Errorf("path is a directory")
 	}
-
-	// Check file size (empty file)
-	if info.Size() == 0 {
-		return fmt.Errorf("file is empty")
+	// Maybe check extension?
+	ext := strings.ToLower(filepath.Ext(path))
+	if ext != ".mp4" && ext != ".mov" { // Assuming Veo supports these
+		return fmt.Errorf("unsupported video format: %s", ext)
 	}
-
-	// Validate format (must be MP4)
-	ext := strings.ToLower(filepath.Ext(filePath))
-	if ext != ".mp4" {
-		return fmt.Errorf("unsupported video format: %s (must be .mp4)", ext)
-	}
-
-	// Note: In a full implementation, we'd validate:
-	// - Video is Veo-generated (metadata check)
-	// - Video duration ≤ 141 seconds
-	// - Video resolution and format compatibility
-	// For now, basic file validation is sufficient
-
-	return nil
-}
-
-// ValidateCompatibleDimensions validates that two images have compatible dimensions
-func ValidateCompatibleDimensions(width1, height1, width2, height2 int) error {
-	// Check for invalid dimensions
-	if width1 <= 0 || height1 <= 0 || width2 <= 0 || height2 <= 0 {
-		return fmt.Errorf("invalid dimensions: (%dx%d) and (%dx%d)", width1, height1, width2, height2)
-	}
-
-	// Check if dimensions match
-	if width1 != width2 || height1 != height2 {
-		return fmt.Errorf("dimensions must match: first image (%dx%d) != second image (%dx%d)",
-			width1, height1, width2, height2)
-	}
-
 	return nil
 }

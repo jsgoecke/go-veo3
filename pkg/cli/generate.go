@@ -174,7 +174,7 @@ func runGenerateText(cmd *cobra.Command, args []string) error {
 		apiKey = cfg.APIKey
 	}
 
-	client, err := veo3.NewClient(apiKey)
+	client, err := veo3.NewClient(context.Background(), apiKey)
 	if err != nil {
 		return handleError(err, jsonFormat, pretty)
 	}
