@@ -31,7 +31,22 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+This feature must comply with all constitutional principles. Verify:
+
+- [ ] **Test-First (Principle II)**: Feature spec includes explicit test requirements and success criteria (NON-NEGOTIABLE)
+- [ ] **Quality Gates (Principle VI)**: 80% minimum test coverage target defined
+- [ ] **Library-First (Principle I)**: Complex logic extracted to standalone libraries with CLI interfaces (if applicable)
+- [ ] **Integration Testing (Principle III)**: Critical paths identified for integration tests (if applicable)
+- [ ] **Observability (Principle IV)**: Structured logging and metrics plan included (if applicable)
+- [ ] **Documentation First (Principle V)**: Documentation created before implementation begins
+- [ ] **APIs as First-Class (Principle VII)**: API design meets public-facing standards (if applicable)
+- [ ] **Scope-Based Auth (Principle VIII)**: Permission scopes defined for all capabilities (if applicable)
+- [ ] **Feature Flags (Principle IX)**: Feature flag strategy defined for controlled rollout
+- [ ] **Backend/Frontend Isolation (Principle X)**: Clear API boundaries maintained (if applicable)
+- [ ] **Built for Compliance (Principle XI)**: Compliance implications documented (SOC2, ISO27001, HiTrust, HIPAA)
+- [ ] **Semantic Versioning (Principle XII)**: Version impact assessed (MAJOR/MINOR/PATCH)
+
+**Complexity Justification Required**: If this feature violates any principle (e.g., adds 4th project, skips tests, bypasses gates), document in Complexity Tracking section below with explicit rationale and migration plan.
 
 ## Project Structure
 
