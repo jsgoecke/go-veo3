@@ -181,9 +181,9 @@ func (p *Poller) WaitForCompletion(ctx context.Context, operationID string, show
 	}
 
 	// Get final operation state
-	op, exists := p.manager.GetOperation(operationID)
-	if !exists {
-		return nil, fmt.Errorf("operation not found after polling: %s", operationID)
+	op, err := p.manager.GetOperation(operationID)
+	if err != nil {
+		return nil, fmt.Errorf("operation not found after polling: %w", err)
 	}
 
 	if showProgress {
