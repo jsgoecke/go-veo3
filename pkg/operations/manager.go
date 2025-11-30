@@ -16,10 +16,14 @@ type Manager struct {
 	mutex      sync.RWMutex
 }
 
-// NewManager creates a new operation manager
-func NewManager(client *veo3.Client) *Manager {
+// NewManager creates a new operation manager with optional client
+func NewManager(client ...*veo3.Client) *Manager {
+	var c *veo3.Client
+	if len(client) > 0 {
+		c = client[0]
+	}
 	return &Manager{
-		client:     client,
+		client:     c,
 		operations: make(map[string]*veo3.Operation),
 	}
 }
@@ -41,7 +45,19 @@ func (m *Manager) SubmitOperation(ctx context.Context, req *veo3.GenerationReque
 }
 
 // GetOperation retrieves an operation by ID
-func (m *Manager) GetOperation(operationID string) (*veo3.Operation, bool) {
+func (m *Manager) GetOperation(operationID string) (*veo3.Operation, error) {
+	m.mutex.RLock()
+	defer m.mutex.RUnlock()
+
+	op, exists := m.operations[operationID]
+	if !exists {
+		return nil, fmt.Errorf("operation not found: %s", operationID)
+	}
+	return op, nil
+}
+
+// GetOperationExists retrieves an operation by ID (legacy interface)
+func (m *Manager) GetOperationExists(operationID string) (*veo3.Operation, bool) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
@@ -50,11 +66,52 @@ func (m *Manager) GetOperation(operationID string) (*veo3.Operation, bool) {
 }
 
 // UpdateOperation updates the status of an operation
-func (m *Manager) UpdateOperation(op *veo3.Operation) {
+func (m *Manager) UpdateOperation(op *veo3.Operation) error {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
 	m.operations[op.ID] = op
+	return nil
+}
+
+// AddOperation adds a new operation to tracking
+func (m *Manager) AddOperation(op *veo3.Operation) error {
+	if op == nil {
+		return fmt.Errorf("operation cannot be nil")
+	}
+
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	m.operations[op.ID] = op
+	return nil
+}
+
+// RemoveOperation removes an operation from tracking
+func (m *Manager) RemoveOperation(operationID string) error {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	if _, exists := m.operations[operationID]; !exists {
+		return fmt.Errorf("operation not found: %s", operationID)
+	}
+
+	delete(m.operations, operationID)
+	return nil
+}
+
+// FilterOperations returns operations filtered by status
+func (m *Manager) FilterOperations(status veo3.OperationStatus) []*veo3.Operation {
+	m.mutex.RLock()
+	defer m.mutex.RUnlock()
+
+	var filtered []*veo3.Operation
+	for _, op := range m.operations {
+		if op.Status == status {
+			filtered = append(filtered, op)
+		}
+	}
+	return filtered
 }
 
 // ListOperations returns all tracked operations

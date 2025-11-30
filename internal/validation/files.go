@@ -174,6 +174,88 @@ func ValidateImageSize(size int64) error {
 	return nil
 }
 
+// ValidateInterpolationImages validates that two images are compatible for interpolation
+func ValidateInterpolationImages(firstPath, lastPath string) error {
+	// Check that paths are not empty
+	if firstPath == "" {
+		return fmt.Errorf("first frame path cannot be empty")
+	}
+	if lastPath == "" {
+		return fmt.Errorf("last frame path cannot be empty")
+	}
+
+	// Check that they're not the same file
+	if firstPath == lastPath {
+		return fmt.Errorf("first and last frame cannot be the same file")
+	}
+
+	// Validate both image files exist and are valid
+	if err := ValidateImageFile(firstPath); err != nil {
+		return fmt.Errorf("first frame validation failed: %w", err)
+	}
+
+	if err := ValidateImageFile(lastPath); err != nil {
+		return fmt.Errorf("last frame validation failed: %w", err)
+	}
+
+	// Check dimensions compatibility
+	config1, _, err := DecodeImageConfig(firstPath)
+	if err != nil {
+		return fmt.Errorf("cannot decode first frame: %w", err)
+	}
+
+	config2, _, err := DecodeImageConfig(lastPath)
+	if err != nil {
+		return fmt.Errorf("cannot decode last frame: %w", err)
+	}
+
+	if err := ValidateCompatibleDimensions(config1.Width, config1.Height, config2.Width, config2.Height); err != nil {
+		return fmt.Errorf("frame dimension mismatch: %w", err)
+	}
+
+	return nil
+}
+
+// ValidateVideoFileForExtension validates a video file for extension functionality
+func ValidateVideoFileForExtension(filePath string) error {
+	if filePath == "" {
+		return fmt.Errorf("video path cannot be empty")
+	}
+
+	// Check if file exists and get info
+	info, err := os.Stat(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("no such file: %s", filePath)
+		}
+		return fmt.Errorf("cannot access file: %w", err)
+	}
+
+	// Check if it's a directory
+	if info.IsDir() {
+		return fmt.Errorf("path is a directory, not a file: %s", filePath)
+	}
+
+	// Check file size (empty file)
+	if info.Size() == 0 {
+		return fmt.Errorf("file is empty")
+	}
+
+	// Validate format (must be MP4)
+	ext := strings.ToLower(filepath.Ext(filePath))
+	if ext != ".mp4" {
+		return fmt.Errorf("unsupported video format: %s (must be .mp4)", ext)
+	}
+
+	// Note: In a full implementation, we'd validate:
+	// - Video is Veo-generated (metadata check)
+	// - Video duration ≤ 141 seconds
+	// - Video resolution and format compatibility
+	// For now, basic file validation is sufficient
+
+	return nil
+}
+
 // ValidateCompatibleDimensions validates that two images have compatible dimensions
 func ValidateCompatibleDimensions(width1, height1, width2, height2 int) error {
 	// Check for invalid dimensions
