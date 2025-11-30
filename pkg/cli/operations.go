@@ -174,7 +174,7 @@ func runOperationsList(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create operations manager (without client for listing stored operations)
-	opsManager := operations.NewManager()
+	opsManager := operations.NewManager(nil)
 
 	// Get filter status
 	statusFilter, _ := cmd.Flags().GetString("status")
@@ -235,7 +235,7 @@ func runOperationsStatus(cmd *cobra.Command, args []string) error {
 	operationID := args[0]
 
 	// Create operations manager
-	opsManager := operations.NewManager()
+	opsManager := operations.NewManager(nil)
 
 	watch, _ := cmd.Flags().GetBool("watch")
 	jsonFormat := viper.GetBool("json")
@@ -276,7 +276,7 @@ func runOperationsDownload(cmd *cobra.Command, args []string) error {
 	jsonFormat := viper.GetBool("json")
 
 	// Create operations manager
-	opsManager := operations.NewManager()
+	opsManager := operations.NewManager(nil)
 
 	// Get operation
 	op, err := opsManager.GetOperation(operationID)
@@ -349,7 +349,7 @@ func runOperationsCancel(cmd *cobra.Command, args []string) error {
 
 	// Create API client
 	apiKey := viper.GetString("api-key")
-	client, err := veo3.NewClient(apiKey)
+	client, err := veo3.NewClient(context.Background(), apiKey)
 	if err != nil {
 		return handleError(err, jsonFormat, false)
 	}

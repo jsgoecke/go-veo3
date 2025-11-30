@@ -9,101 +9,118 @@ import (
 	"github.com/jasongoecke/go-veo3/pkg/veo3"
 )
 
-// Manager handles operation lifecycle management
+// Manager manages operation lifecycle and state
 type Manager struct {
 	client     *veo3.Client
 	operations map[string]*veo3.Operation
-	mutex      sync.RWMutex
+	mu         sync.RWMutex
 }
 
-// NewManager creates a new operation manager with optional client
-func NewManager(client ...*veo3.Client) *Manager {
-	var c *veo3.Client
-	if len(client) > 0 {
-		c = client[0]
-	}
+// OperationStats contains statistics about operations
+type OperationStats struct {
+	Total     int
+	Pending   int
+	Running   int
+	Completed int
+	Failed    int
+	Cancelled int
+}
+
+// NewManager creates a new operation manager
+func NewManager(client *veo3.Client) *Manager {
 	return &Manager{
-		client:     c,
+		client:     client,
 		operations: make(map[string]*veo3.Operation),
 	}
 }
 
-// SubmitOperation submits a new operation and starts tracking it
-func (m *Manager) SubmitOperation(ctx context.Context, req *veo3.GenerationRequest) (*veo3.Operation, error) {
-	// Submit the operation to the API
-	op, err := m.client.GenerateVideo(ctx, req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to submit operation: %w", err)
-	}
-
-	// Store the operation for tracking
-	m.mutex.Lock()
+// AddOperation adds an operation to the manager
+func (m *Manager) AddOperation(op *veo3.Operation) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.operations[op.ID] = op
-	m.mutex.Unlock()
-
-	return op, nil
 }
 
 // GetOperation retrieves an operation by ID
 func (m *Manager) GetOperation(operationID string) (*veo3.Operation, error) {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 
 	op, exists := m.operations[operationID]
 	if !exists {
-		return nil, fmt.Errorf("operation not found: %s", operationID)
+		return nil, fmt.Errorf("operation %s not found", operationID)
 	}
+
 	return op, nil
 }
 
-// GetOperationExists retrieves an operation by ID (legacy interface)
-func (m *Manager) GetOperationExists(operationID string) (*veo3.Operation, bool) {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-
-	op, exists := m.operations[operationID]
-	return op, exists
-}
-
-// UpdateOperation updates the status of an operation
+// UpdateOperation updates an existing operation
 func (m *Manager) UpdateOperation(op *veo3.Operation) error {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
-	m.operations[op.ID] = op
-	return nil
-}
-
-// AddOperation adds a new operation to tracking
-func (m *Manager) AddOperation(op *veo3.Operation) error {
-	if op == nil {
-		return fmt.Errorf("operation cannot be nil")
+	if _, exists := m.operations[op.ID]; !exists {
+		return fmt.Errorf("operation %s not found", op.ID)
 	}
 
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-
 	m.operations[op.ID] = op
 	return nil
 }
 
-// RemoveOperation removes an operation from tracking
+// RemoveOperation removes an operation from the manager
 func (m *Manager) RemoveOperation(operationID string) error {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
 	if _, exists := m.operations[operationID]; !exists {
-		return fmt.Errorf("operation not found: %s", operationID)
+		return fmt.Errorf("operation %s not found", operationID)
 	}
 
 	delete(m.operations, operationID)
 	return nil
 }
 
-// FilterOperations returns operations filtered by status
+// ListOperations returns all operations, ordered by start time (newest first)
+func (m *Manager) ListOperations() []*veo3.Operation {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	ops := make([]*veo3.Operation, 0, len(m.operations))
+	for _, op := range m.operations {
+		ops = append(ops, op)
+	}
+
+	// Sort by start time, newest first
+	for i := 0; i < len(ops)-1; i++ {
+		for j := i + 1; j < len(ops); j++ {
+			if ops[i].StartTime.Before(ops[j].StartTime) {
+				ops[i], ops[j] = ops[j], ops[i]
+			}
+		}
+	}
+
+	return ops
+}
+
+// ListActiveOperations returns operations that are pending or running
+func (m *Manager) ListActiveOperations() []*veo3.Operation {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	var active []*veo3.Operation
+	for _, op := range m.operations {
+		if op.Status == veo3.StatusPending || op.Status == veo3.StatusRunning {
+			active = append(active, op)
+		}
+	}
+
+	return active
+}
+
+// FilterOperations returns operations matching the given status
 func (m *Manager) FilterOperations(status veo3.OperationStatus) []*veo3.Operation {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 
 	var filtered []*veo3.Operation
 	for _, op := range m.operations {
@@ -111,91 +128,20 @@ func (m *Manager) FilterOperations(status veo3.OperationStatus) []*veo3.Operatio
 			filtered = append(filtered, op)
 		}
 	}
+
 	return filtered
 }
 
-// ListOperations returns all tracked operations
-func (m *Manager) ListOperations() []*veo3.Operation {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-
-	ops := make([]*veo3.Operation, 0, len(m.operations))
-	for _, op := range m.operations {
-		ops = append(ops, op)
-	}
-	return ops
-}
-
-// ListActiveOperations returns operations that are still running
-func (m *Manager) ListActiveOperations() []*veo3.Operation {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-
-	var activeOps []*veo3.Operation
-	for _, op := range m.operations {
-		if op.Status == veo3.StatusPending || op.Status == veo3.StatusRunning {
-			activeOps = append(activeOps, op)
-		}
-	}
-	return activeOps
-}
-
-// CancelOperation cancels a running operation
-func (m *Manager) CancelOperation(ctx context.Context, operationID string) error {
-	// Check if operation exists and is cancellable
-	m.mutex.RLock()
-	op, exists := m.operations[operationID]
-	m.mutex.RUnlock()
-
-	if !exists {
-		return fmt.Errorf("operation not found: %s", operationID)
-	}
-
-	if op.Status != veo3.StatusPending && op.Status != veo3.StatusRunning {
-		return fmt.Errorf("operation %s is not cancellable (status: %s)", operationID, op.Status)
-	}
-
-	// Cancel via API
-	if err := m.client.CancelOperation(ctx, operationID); err != nil {
-		return fmt.Errorf("failed to cancel operation: %w", err)
-	}
-
-	// Update local status
-	now := time.Now()
-	op.Status = veo3.StatusCancelled
-	op.EndTime = &now
-	m.UpdateOperation(op)
-
-	return nil
-}
-
-// CleanupCompletedOperations removes old completed operations from memory
-func (m *Manager) CleanupCompletedOperations(maxAge time.Duration) int {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-
-	cutoff := time.Now().Add(-maxAge)
-	deleted := 0
-
-	for id, op := range m.operations {
-		if op.EndTime != nil && op.EndTime.Before(cutoff) {
-			delete(m.operations, id)
-			deleted++
-		}
-	}
-
-	return deleted
-}
-
-// GetOperationStats returns statistics about operations
+// GetOperationStats returns statistics about all operations
 func (m *Manager) GetOperationStats() OperationStats {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 
-	stats := OperationStats{}
+	stats := OperationStats{
+		Total: len(m.operations),
+	}
 
 	for _, op := range m.operations {
-		stats.Total++
 		switch op.Status {
 		case veo3.StatusPending:
 			stats.Pending++
@@ -213,12 +159,50 @@ func (m *Manager) GetOperationStats() OperationStats {
 	return stats
 }
 
-// OperationStats holds statistics about operations
-type OperationStats struct {
-	Total     int `json:"total"`
-	Pending   int `json:"pending"`
-	Running   int `json:"running"`
-	Completed int `json:"completed"`
-	Failed    int `json:"failed"`
-	Cancelled int `json:"cancelled"`
+// CancelOperation cancels a running operation via the API
+func (m *Manager) CancelOperation(ctx context.Context, operationID string) error {
+	if m.client == nil {
+		return fmt.Errorf("no client available")
+	}
+
+	// Cancel via API
+	err := m.client.CancelOperation(ctx, operationID)
+	if err != nil {
+		return fmt.Errorf("failed to cancel operation: %w", err)
+	}
+
+	// Update local state
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if op, exists := m.operations[operationID]; exists {
+		op.Status = veo3.StatusCancelled
+		now := time.Now()
+		op.EndTime = &now
+	}
+
+	return nil
+}
+
+// List retrieves operations from the API
+func (m *Manager) List(ctx context.Context, filter veo3.OperationStatus) ([]*veo3.Operation, error) {
+	if m.client == nil {
+		return nil, fmt.Errorf("no client available")
+	}
+
+	return m.client.ListOperations(ctx, filter)
+}
+
+// GetStatus retrieves the current status of an operation from the API
+func (m *Manager) GetStatus(ctx context.Context, operationID string) (*veo3.Operation, error) {
+	if m.client == nil {
+		return nil, fmt.Errorf("no client available")
+	}
+
+	return m.client.GetOperationStatus(ctx, operationID)
+}
+
+// Cancel cancels an operation via the API (alias for CancelOperation)
+func (m *Manager) Cancel(ctx context.Context, operationID string) error {
+	return m.CancelOperation(ctx, operationID)
 }
