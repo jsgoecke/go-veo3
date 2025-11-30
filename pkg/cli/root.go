@@ -41,6 +41,8 @@ extend existing videos, use reference images, and perform frame interpolation fr
 	// Add subcommands
 	cmd.AddCommand(newGenerateCmd())
 	cmd.AddCommand(newAnimateCmd())
+	cmd.AddCommand(newInterpolateCmd())
+	cmd.AddCommand(newExtendCmd())
 
 	return cmd
 }

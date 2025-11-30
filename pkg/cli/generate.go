@@ -89,6 +89,7 @@ func newGenerateCmd() *cobra.Command {
 	generateCmd.Flags().StringP("aspect-ratio", "a", "", "Aspect ratio (16:9 or 9:16)")
 	generateCmd.Flags().StringP("model", "m", "", "Model to use")
 	generateCmd.Flags().String("negative-prompt", "", "Negative prompt (elements to exclude)")
+	generateCmd.Flags().StringSlice("reference", []string{}, "Reference image paths (max 3, requires 8s duration and 16:9 aspect ratio)")
 	generateCmd.Flags().String("output", "", "Output directory for downloaded video")
 	generateCmd.Flags().String("filename", "", "Custom filename for output video")
 	generateCmd.Flags().Bool("no-wait", false, "Start generation and return immediately")
@@ -103,6 +104,7 @@ func newGenerateCmd() *cobra.Command {
 	generateTextCmd.Flags().StringP("aspect-ratio", "a", "", "Aspect ratio (16:9 or 9:16)")
 	generateTextCmd.Flags().StringP("model", "m", "", "Model to use")
 	generateTextCmd.Flags().String("negative-prompt", "", "Negative prompt (elements to exclude)")
+	generateTextCmd.Flags().StringSlice("reference", []string{}, "Reference image paths (max 3, requires 8s duration and 16:9 aspect ratio)")
 	generateTextCmd.Flags().String("output", "", "Output directory for downloaded video")
 	generateTextCmd.Flags().String("filename", "", "Custom filename for output video")
 	generateTextCmd.Flags().Bool("no-wait", false, "Start generation and return immediately")
@@ -155,6 +157,7 @@ func runGenerateText(cmd *cobra.Command, args []string) error {
 	aspectRatio := getStringWithDefault(cmd, "aspect-ratio", cfg.DefaultAspectRatio)
 	model := getStringWithDefault(cmd, "model", cfg.DefaultModel)
 	negativePrompt, _ := cmd.Flags().GetString("negative-prompt")
+	referenceImages, _ := cmd.Flags().GetStringSlice("reference")
 	outputDir := getStringWithDefault(cmd, "output", cfg.OutputDirectory)
 	filename, _ := cmd.Flags().GetString("filename")
 	noWait, _ := cmd.Flags().GetBool("no-wait")
@@ -162,7 +165,28 @@ func runGenerateText(cmd *cobra.Command, args []string) error {
 	jsonFormat := viper.GetBool("json")
 	pretty, _ := cmd.Flags().GetBool("pretty")
 
-	// Create generation request
+	// Create context
+	ctx := context.Background()
+
+	// Create API client
+	apiKey := viper.GetString("api-key")
+	if apiKey == "" {
+		apiKey = cfg.APIKey
+	}
+
+	client, err := veo3.NewClient(apiKey)
+	if err != nil {
+		return handleError(err, jsonFormat, pretty)
+	}
+
+	// Check if reference images are provided
+	if len(referenceImages) > 0 {
+		return handleReferenceImageGeneration(ctx, client, prompt, negativePrompt, model,
+			resolution, duration, aspectRatio, referenceImages, outputDir, filename,
+			noWait, noDownload, jsonFormat, pretty)
+	}
+
+	// Regular text-to-video generation
 	request := &veo3.GenerationRequest{
 		Prompt:           prompt,
 		NegativePrompt:   negativePrompt,
@@ -178,19 +202,7 @@ func runGenerateText(cmd *cobra.Command, args []string) error {
 		return handleError(err, jsonFormat, pretty)
 	}
 
-	// Create API client
-	apiKey := viper.GetString("api-key")
-	if apiKey == "" {
-		apiKey = cfg.APIKey
-	}
-
-	client, err := veo3.NewClient(apiKey)
-	if err != nil {
-		return handleError(err, jsonFormat, pretty)
-	}
-
 	// Submit generation request
-	ctx := context.Background()
 	operation, err := client.GenerateVideo(ctx, request)
 	if err != nil {
 		return handleError(err, jsonFormat, pretty)
@@ -349,4 +361,81 @@ func downloadVideo(ctx context.Context, operation *veo3.Operation, outputDir str
 	}
 
 	return nil
+}
+
+// handleReferenceImageGeneration handles generation with reference images
+func handleReferenceImageGeneration(ctx context.Context, client *veo3.Client, prompt, negativePrompt, model,
+	resolution string, duration int, aspectRatio string, referenceImages []string, outputDir, filename string,
+	noWait, noDownload, jsonFormat, pretty bool) error {
+
+	// Create reference image request
+	request := &veo3.ReferenceImageRequest{
+		GenerationRequest: veo3.GenerationRequest{
+			Prompt:           prompt,
+			NegativePrompt:   negativePrompt,
+			Model:            model,
+			AspectRatio:      aspectRatio,
+			Resolution:       resolution,
+			DurationSeconds:  duration,
+			PersonGeneration: "", // Use default
+		},
+		ReferenceImagePaths: referenceImages,
+	}
+
+	// Validate request
+	if err := request.Validate(); err != nil {
+		return handleError(err, jsonFormat, pretty)
+	}
+
+	// Show upload progress for reference images
+	if !jsonFormat {
+		fmt.Printf("⬆ Uploading %d reference image(s)...\n", len(referenceImages))
+
+		for i, imagePath := range referenceImages {
+			fmt.Printf("  %d. %s\n", i+1, imagePath)
+
+			// Get image info for display
+			imageInfo, err := veo3.GetImageInfo(imagePath)
+			if err == nil {
+				sizeMB := float64(imageInfo.SizeBytes) / (1024 * 1024)
+				fmt.Printf("     📸 %dx%d %s (%.1f MB)\n",
+					imageInfo.Width, imageInfo.Height, imageInfo.Format, sizeMB)
+			}
+		}
+	}
+
+	// Submit reference image generation request
+	operation, err := client.GenerateWithReferenceImages(ctx, request)
+	if err != nil {
+		return handleError(err, jsonFormat, pretty)
+	}
+
+	// Handle async mode
+	if noWait {
+		return outputOperation(operation, jsonFormat, pretty)
+	}
+
+	// Poll for completion with progress display
+	if !jsonFormat {
+		fmt.Printf("🎨 Generating with reference style... (Operation: %s)\n", operation.ID)
+	}
+
+	operation, err = pollOperation(ctx, client, operation.ID, jsonFormat)
+	if err != nil {
+		return handleError(err, jsonFormat, pretty)
+	}
+
+	// Download video if completed and not disabled
+	if operation.Status == veo3.StatusDone && !noDownload {
+		if !jsonFormat {
+			fmt.Println("✓ Reference-guided generation completed!")
+		}
+
+		err = downloadVideo(ctx, operation, outputDir, filename, jsonFormat)
+		if err != nil {
+			return handleError(err, jsonFormat, pretty)
+		}
+	}
+
+	return outputOperation(operation, jsonFormat, pretty)
 }
