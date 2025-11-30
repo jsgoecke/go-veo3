@@ -12,7 +12,7 @@ import (
 )
 
 func TestManager_ListOperations(t *testing.T) {
-	manager := operations.NewManager()
+	manager := operations.NewManager(nil) // nil client is fine for local operations
 
 	// Initially empty
 	ops := manager.ListOperations()
@@ -45,7 +45,7 @@ func TestManager_ListOperations(t *testing.T) {
 }
 
 func TestManager_GetOperation(t *testing.T) {
-	manager := operations.NewManager()
+	manager := operations.NewManager(nil)
 
 	// Get non-existent operation
 	op, err := manager.GetOperation("operations/nonexistent")
@@ -70,7 +70,7 @@ func TestManager_GetOperation(t *testing.T) {
 }
 
 func TestManager_UpdateOperation(t *testing.T) {
-	manager := operations.NewManager()
+	manager := operations.NewManager(nil)
 
 	// Add initial operation
 	testOp := &veo3.Operation{
@@ -101,7 +101,7 @@ func TestManager_UpdateOperation(t *testing.T) {
 }
 
 func TestManager_RemoveOperation(t *testing.T) {
-	manager := operations.NewManager()
+	manager := operations.NewManager(nil)
 
 	// Add operation
 	testOp := &veo3.Operation{
@@ -130,7 +130,7 @@ func TestManager_RemoveOperation(t *testing.T) {
 }
 
 func TestManager_GetOperationStats(t *testing.T) {
-	manager := operations.NewManager()
+	manager := operations.NewManager(nil)
 
 	// Initially empty stats
 	stats := manager.GetOperationStats()
@@ -166,7 +166,7 @@ func TestManager_GetOperationStats(t *testing.T) {
 }
 
 func TestManager_FilterOperations(t *testing.T) {
-	manager := operations.NewManager()
+	manager := operations.NewManager(nil)
 
 	// Add operations with different statuses
 	operations := []*veo3.Operation{
@@ -195,7 +195,7 @@ func TestManager_FilterOperations(t *testing.T) {
 }
 
 func TestManager_ConcurrentAccess(t *testing.T) {
-	manager := operations.NewManager()
+	manager := operations.NewManager(nil)
 
 	// Test concurrent add/get operations
 	done := make(chan bool, 2)

@@ -72,10 +72,10 @@
 > **CONSTITUTION REQUIREMENT: Write these tests FIRST, ensure they FAIL before implementation**
 > **Tests are NON-NEGOTIABLE per Principle II - minimum 80% coverage required**
 
-- [ ] T021 [P] [US1] Write unit tests for GenerationRequest validation in tests/unit/veo3/generate_test.go
-- [ ] T022 [P] [US1] Write unit tests for prompt validation (length, content) in tests/unit/validation/params_test.go
-- [ ] T023 [P] [US1] Write integration test for full generate command flow in tests/integration/cli_test.go
-- [ ] T024 [P] [US1] Write API client mock tests for text-to-video request in tests/unit/veo3/client_test.go
+- [x] T021 [P] [US1] Write unit tests for GenerationRequest validation in tests/unit/veo3/generate_test.go
+- [x] T022 [P] [US1] Write unit tests for prompt validation (length, content) in tests/unit/validation/params_test.go
+- [x] T023 [P] [US1] Write integration test for full generate command flow in tests/integration/cli_test.go
+- [x] T024 [P] [US1] Write API client mock tests for text-to-video request in tests/unit/veo3/client_test.go
 
 ### Implementation for User Story 1
 
@@ -101,20 +101,20 @@
 
 ### Tests for User Story 2 (MANDATORY) ⚠️
 
-- [ ] T034 [P] [US2] Write unit tests for ImageRequest validation in tests/unit/veo3/animate_test.go
-- [ ] T035 [P] [US2] Write unit tests for image file validation (format, size) in tests/unit/validation/files_test.go
-- [ ] T036 [P] [US2] Write integration test for animate command in tests/integration/cli_test.go
-- [ ] T037 [P] [US2] Write tests for base64 encoding of images in tests/unit/veo3/animate_test.go
+- [x] T034 [P] [US2] Write unit tests for ImageRequest validation in tests/unit/veo3/animate_test.go
+- [x] T035 [P] [US2] Write unit tests for image file validation (format, size) in tests/unit/validation/files_test.go
+- [x] T036 [P] [US2] Write integration test for animate command in tests/integration/cli_test.go
+- [x] T037 [P] [US2] Write tests for base64 encoding of images in tests/unit/veo3/animate_test.go
 
 ### Implementation for User Story 2
 
-- [ ] T038 [P] [US2] Create pkg/veo3/animate.go with AnimateImage function and ImageRequest struct
-- [ ] T039 [P] [US2] Implement image file validation (magic bytes, size limit) in internal/validation/files.go
-- [ ] T040 [US2] Implement base64 encoding for image upload in pkg/veo3/animate.go
-- [ ] T041 [P] [US2] Create pkg/cli/animate.go with cobra command for 'animate' subcommand
-- [ ] T042 [US2] Wire up command for image path positional arg and prompt flag
-- [ ] T043 [US2] Add error handling for unsupported formats and size limits in pkg/cli/animate.go
-- [ ] T044 [US2] Integrate with operation polling and download from US1
+- [x] T038 [P] [US2] Create pkg/veo3/animate.go with AnimateImage function and ImageRequest struct
+- [x] T039 [P] [US2] Implement image file validation (magic bytes, size limit) in internal/validation/files.go
+- [x] T040 [US2] Implement base64 encoding for image upload in pkg/veo3/animate.go
+- [x] T041 [P] [US2] Create pkg/cli/animate.go with cobra command for 'animate' subcommand
+- [x] T042 [US2] Wire up command for image path positional arg and prompt flag
+- [x] T043 [US2] Add error handling for unsupported formats and size limits in pkg/cli/animate.go
+- [x] T044 [US2] Integrate with operation polling and download from US1
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -128,18 +128,18 @@
 
 ### Tests for User Story 3 (MANDATORY) ⚠️
 
-- [ ] T045 [P] [US3] Write unit tests for InterpolationRequest validation in tests/unit/veo3/interpolate_test.go
-- [ ] T046 [P] [US3] Write unit tests for compatible dimensions check in tests/unit/validation/files_test.go
-- [ ] T047 [P] [US3] Write integration test for interpolate command in tests/integration/cli_test.go
+- [x] T045 [P] [US3] Write unit tests for InterpolationRequest validation in tests/unit/veo3/interpolate_test.go
+- [x] T046 [P] [US3] Write unit tests for compatible dimensions check in tests/unit/validation/files_test.go
+- [x] T047 [P] [US3] Write integration test for interpolate command in tests/integration/cli_interpolate_test.go
 
 ### Implementation for User Story 3
 
-- [ ] T048 [P] [US3] Create pkg/veo3/interpolate.go with InterpolateFrames function and InterpolationRequest struct
-- [ ] T049 [US3] Implement dual image loading and validation in pkg/veo3/interpolate.go
-- [ ] T050 [US3] Enforce constraints (8s duration, 16:9 aspect) in pkg/veo3/interpolate.go
-- [ ] T051 [P] [US3] Create pkg/cli/interpolate.go with cobra command for 'interpolate' subcommand
-- [ ] T052 [US3] Wire up command for two positional args (first and last frame paths)
-- [ ] T053 [US3] Add compatibility validation error messages in pkg/cli/interpolate.go
+- [x] T048 [P] [US3] Create pkg/veo3/interpolate.go with InterpolateFrames function and InterpolationRequest struct
+- [x] T049 [US3] Implement dual image loading and validation in pkg/veo3/interpolate.go
+- [x] T050 [US3] Enforce constraints (8s duration, 16:9 aspect) in pkg/veo3/interpolate.go
+- [x] T051 [P] [US3] Create pkg/cli/interpolate.go with cobra command for 'interpolate' subcommand
+- [x] T052 [US3] Wire up command for two positional args (first and last frame paths)
+- [x] T053 [US3] Add compatibility validation error messages in pkg/cli/interpolate.go
 
 **Checkpoint**: All P0 and first P1 story should now be independently functional
 
@@ -153,17 +153,17 @@
 
 ### Tests for User Story 4 (MANDATORY) ⚠️
 
-- [ ] T054 [P] [US4] Write unit tests for ReferenceImageRequest validation in tests/unit/veo3/reference_test.go
-- [ ] T055 [P] [US4] Write unit tests for 1-3 reference image count validation in tests/unit/veo3/reference_test.go
-- [ ] T056 [P] [US4] Write integration test for reference images in tests/integration/cli_test.go
+- [x] T054 [P] [US4] Write unit tests for ReferenceImageRequest validation in tests/unit/veo3/reference_test.go
+- [x] T055 [P] [US4] Write unit tests for 1-3 reference image count validation in tests/unit/veo3/reference_test.go
+- [x] T056 [P] [US4] Write integration test for reference images in tests/integration/cli_reference_test.go
 
 ### Implementation for User Story 4
 
-- [ ] T057 [P] [US4] Create pkg/veo3/reference.go with reference image handling and ReferenceImageRequest struct
-- [ ] T058 [US4] Implement multi-file validation and base64 encoding in pkg/veo3/reference.go
-- [ ] T059 [US4] Enforce model constraints (Veo 3.1 only, 8s, 16:9) in pkg/veo3/reference.go
-- [ ] T060 [US4] Add --reference flag support to pkg/cli/generate.go (repeatable flag)
-- [ ] T061 [US4] Add validation for max 3 references with clear error in pkg/cli/generate.go
+- [x] T057 [P] [US4] Create pkg/veo3/reference.go with reference image handling and ReferenceImageRequest struct
+- [x] T058 [US4] Implement multi-file validation and base64 encoding in pkg/veo3/reference.go
+- [x] T059 [US4] Enforce model constraints (Veo 3.1 only, 8s, 16:9) in pkg/veo3/reference.go
+- [x] T060 [US4] Add --reference flag support to pkg/cli/generate.go (repeatable flag)
+- [x] T061 [US4] Add validation for max 3 references with clear error in pkg/cli/generate.go
 
 **Checkpoint**: Reference-guided generation ready for brand consistency workflows
 
@@ -177,18 +177,18 @@
 
 ### Tests for User Story 5 (MANDATORY) ⚠️
 
-- [ ] T062 [P] [US5] Write unit tests for ExtensionRequest validation in tests/unit/veo3/extend_test.go
-- [ ] T063 [P] [US5] Write unit tests for video validation (duration, format) in tests/unit/validation/files_test.go
-- [ ] T064 [P] [US5] Write integration test for extend command in tests/integration/cli_test.go
+- [x] T062 [P] [US5] Write unit tests for ExtensionRequest validation in tests/unit/veo3/extend_test.go
+- [x] T063 [P] [US5] Write unit tests for video validation (duration, format) in tests/unit/validation/files_test.go
+- [x] T064 [P] [US5] Write integration test for extend command in tests/integration/cli_test.go
 
 ### Implementation for User Story 5
 
-- [ ] T065 [P] [US5] Create pkg/veo3/extend.go with ExtendVideo function and ExtensionRequest struct
-- [ ] T066 [US5] Implement video file validation (Veo-generated, max 141s) in internal/validation/files.go
-- [ ] T067 [US5] Implement video base64 encoding for upload in pkg/veo3/extend.go
-- [ ] T068 [P] [US5] Create pkg/cli/extend.go with cobra command for 'extend' subcommand
-- [ ] T069 [US5] Wire up command for video path positional arg and extension prompt flag
-- [ ] T070 [US5] Add validation error messages for non-Veo videos in pkg/cli/extend.go
+- [x] T065 [P] [US5] Create pkg/veo3/extend.go with ExtendVideo function and ExtensionRequest struct
+- [x] T066 [US5] Implement video file validation (Veo-generated, max 141s) in internal/validation/files.go
+- [x] T067 [US5] Implement video base64 encoding for upload in pkg/veo3/extend.go
+- [x] T068 [P] [US5] Create pkg/cli/extend.go with cobra command for 'extend' subcommand
+- [x] T069 [US5] Wire up command for video path positional arg and extension prompt flag
+- [x] T070 [US5] Add validation error messages for non-Veo videos in pkg/cli/extend.go
 
 **Checkpoint**: All P1 stories complete - core generation features fully implemented
 
@@ -202,19 +202,19 @@
 
 ### Tests for User Story 6 (MANDATORY) ⚠️
 
-- [ ] T071 [P] [US6] Write unit tests for operation listing in tests/unit/operations/manager_test.go
-- [ ] T072 [P] [US6] Write unit tests for status checking in tests/unit/operations/manager_test.go
-- [ ] T073 [P] [US6] Write unit tests for download and cancel operations in tests/unit/operations/manager_test.go
+- [x] T071 [P] [US6] Write unit tests for operation listing in tests/unit/operations/manager_test.go
+- [x] T072 [P] [US6] Write unit tests for status checking in tests/unit/operations/manager_test.go
+- [x] T073 [P] [US6] Write unit tests for download and cancel operations in tests/unit/operations/manager_test.go
 - [ ] T074 [P] [US6] Write integration tests for operations subcommands in tests/integration/cli_test.go
 
 ### Implementation for User Story 6
 
-- [ ] T075 [US6] Enhance pkg/operations/manager.go with list, status, download, cancel methods
-- [ ] T076 [P] [US6] Create pkg/cli/operations.go with cobra command group for 'operations'
-- [ ] T077 [P] [US6] Implement 'operations list' subcommand in pkg/cli/operations.go
-- [ ] T078 [P] [US6] Implement 'operations status <id>' subcommand in pkg/cli/operations.go
-- [ ] T079 [P] [US6] Implement 'operations download <id>' subcommand in pkg/cli/operations.go
-- [ ] T080 [P] [US6] Implement 'operations cancel <id>' subcommand in pkg/cli/operations.go
+- [x] T075 [US6] Enhance pkg/operations/manager.go with list, status, download, cancel methods
+- [x] T076 [P] [US6] Create pkg/cli/operations.go with cobra command group for 'operations'
+- [x] T077 [P] [US6] Implement 'operations list' subcommand in pkg/cli/operations.go
+- [x] T078 [P] [US6] Implement 'operations status <id>' subcommand in pkg/cli/operations.go
+- [x] T079 [P] [US6] Implement 'operations download <id>' subcommand in pkg/cli/operations.go
+- [x] T080 [P] [US6] Implement 'operations cancel <id>' subcommand in pkg/cli/operations.go
 - [ ] T081 [US6] Add --async flag to generate/animate/interpolate/extend commands
 - [ ] T082 [US6] Add operation ID display for async mode in all generation commands
 
@@ -255,22 +255,22 @@
 
 ### Tests for User Story 8 (MANDATORY) ⚠️
 
-- [ ] T092 [P] [US8] Write unit tests for configuration loading in tests/unit/config/manager_test.go
-- [ ] T093 [P] [US8] Write unit tests for configuration saving in tests/unit/config/manager_test.go
+- [x] T092 [P] [US8] Write unit tests for configuration loading in tests/unit/config/manager_test.go
+- [x] T093 [P] [US8] Write unit tests for configuration saving in tests/unit/config/manager_test.go
 - [ ] T094 [P] [US8] Write integration tests for config commands in tests/integration/cli_test.go
 - [ ] T095 [P] [US8] Write tests for configuration precedence (flag > env > file) in tests/integration/config_test.go
 
 ### Implementation for User Story 8
 
-- [ ] T096 [US8] Enhance pkg/config/manager.go with interactive init, get, set, show, reset methods
-- [ ] T097 [US8] Implement secure file permissions (0600) for config file in pkg/config/manager.go
-- [ ] T098 [US8] Implement XDG Base Directory specification support in pkg/config/manager.go
-- [ ] T099 [P] [US8] Create pkg/cli/config.go with cobra command group for 'config'
-- [ ] T100 [P] [US8] Implement 'config init' interactive setup in pkg/cli/config.go
-- [ ] T101 [P] [US8] Implement 'config set <key> <value>' subcommand in pkg/cli/config.go
-- [ ] T102 [P] [US8] Implement 'config show' with masked sensitive data in pkg/cli/config.go
-- [ ] T103 [P] [US8] Implement 'config reset' subcommand in pkg/cli/config.go
-- [ ] T104 [US8] Wire configuration loading into all commands via Viper
+- [x] T096 [US8] Enhance pkg/config/manager.go with interactive init, get, set, show, reset methods
+- [x] T097 [US8] Implement secure file permissions (0600) for config file in pkg/config/manager.go
+- [x] T098 [US8] Implement XDG Base Directory specification support in pkg/config/manager.go
+- [x] T099 [P] [US8] Create pkg/cli/config.go with cobra command group for 'config'
+- [x] T100 [P] [US8] Implement 'config init' interactive setup in pkg/cli/config.go
+- [x] T101 [P] [US8] Implement 'config set <key> <value>' subcommand in pkg/cli/config.go
+- [x] T102 [P] [US8] Implement 'config show' with masked sensitive data in pkg/cli/config.go
+- [x] T103 [P] [US8] Implement 'config reset' subcommand in pkg/cli/config.go
+- [x] T104 [US8] Wire configuration loading into all commands via Viper
 
 **Checkpoint**: Full configuration system operational
 

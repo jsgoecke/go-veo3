@@ -241,14 +241,14 @@ func runConfigInit(cmd *cobra.Command, args []string) error {
 			"success": true,
 			"data": map[string]interface{}{
 				"message":     "Configuration initialized successfully",
-				"config_file": manager.ConfigFile,
+				"config_file": manager.ConfigFile(),
 			},
 		}
 		jsonOutput, _ := format.FormatGenericJSON(result)
 		fmt.Println(jsonOutput)
 	} else {
 		fmt.Printf("✓ Configuration initialized successfully\n")
-		fmt.Printf("Config file: %s\n", manager.ConfigFile)
+		fmt.Printf("Config file: %s\n", manager.ConfigFile())
 		fmt.Printf("\nNext steps:\n")
 		fmt.Printf("1. Set your API key: veo3 config set api-key YOUR_API_KEY\n")
 		fmt.Printf("2. Generate your first video: veo3 generate --prompt 'A beautiful sunset'\n")
@@ -413,7 +413,7 @@ func runConfigShow(cmd *cobra.Command, args []string) error {
 		fmt.Println(jsonOutput)
 	} else {
 		// Human-readable format
-		fmt.Printf("Configuration File: %s\n\n", manager.ConfigFile)
+		fmt.Printf("Configuration File: %s\n\n", manager.ConfigFile())
 
 		apiKey := cfg.APIKey
 		if !showSensitive && apiKey != "" {
