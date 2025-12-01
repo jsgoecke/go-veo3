@@ -90,7 +90,7 @@ func EncodeVideoToBase64(videoPath string) (string, error) {
 	}
 
 	// Read file contents
-	data, err := os.ReadFile(videoPath)
+	data, err := os.ReadFile(videoPath) // #nosec G304 -- User-specified video path is validated
 	if err != nil {
 		return "", fmt.Errorf("failed to read video file: %w", err)
 	}

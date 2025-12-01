@@ -59,6 +59,26 @@ func (m *Manager) Load() (*Configuration, error) {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
+	// Apply defaults if fields are empty (viper doesn't apply defaults to struct on unmarshal)
+	if cfg.DefaultModel == "" {
+		cfg.DefaultModel = DefaultModel
+	}
+	if cfg.DefaultResolution == "" {
+		cfg.DefaultResolution = DefaultResolution
+	}
+	if cfg.DefaultAspectRatio == "" {
+		cfg.DefaultAspectRatio = DefaultAspectRatio
+	}
+	if cfg.DefaultDuration == 0 {
+		cfg.DefaultDuration = DefaultDuration
+	}
+	if cfg.PollIntervalSeconds == 0 {
+		cfg.PollIntervalSeconds = DefaultPollInterval
+	}
+	if cfg.OutputDirectory == "" {
+		cfg.OutputDirectory = "."
+	}
+
 	// Manual bind for API Key Env if needed, or rely on automatic env
 	if cfg.APIKey == "" {
 		cfg.APIKey = os.Getenv("GEMINI_API_KEY")
@@ -78,7 +98,7 @@ func (m *Manager) Save(cfg *Configuration) error {
 
 	// Ensure config directory exists
 	configDir := filepath.Dir(configPath)
-	if err := os.MkdirAll(configDir, 0755); err != nil {
+	if err := os.MkdirAll(configDir, 0750); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 

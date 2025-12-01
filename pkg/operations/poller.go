@@ -64,7 +64,7 @@ func (p *Poller) PollOperation(ctx context.Context, operationID string, progress
 		interval = p.baseInterval
 
 		// Update operation in manager
-		p.manager.UpdateOperation(op)
+		_ = p.manager.UpdateOperation(op)
 
 		// Call progress callback if provided
 		if progressCallback != nil {
@@ -148,7 +148,7 @@ func (p *Poller) StartContinuousPolling(ctx context.Context, progressCallback fu
 						return // Ignore polling errors in continuous mode
 					}
 
-					p.manager.UpdateOperation(updated)
+					_ = p.manager.UpdateOperation(updated)
 					if progressCallback != nil {
 						progressCallback(updated)
 					}

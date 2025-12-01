@@ -32,7 +32,7 @@ func ValidateImageFile(path string) error {
 		return err
 	}
 
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) // #nosec G304 -- User-specified image path is validated
 	if err != nil {
 		return fmt.Errorf("failed to read image file: %w", err)
 	}
@@ -86,11 +86,11 @@ func ValidateImageSize(size int64) error {
 
 // DecodeImageConfig decodes image configuration
 func DecodeImageConfig(path string) (image.Config, string, error) {
-	f, err := os.Open(path)
+	f, err := os.Open(path) // #nosec G304 -- User-specified image path is validated
 	if err != nil {
 		return image.Config{}, "", err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	return image.DecodeConfig(f)
 }
 

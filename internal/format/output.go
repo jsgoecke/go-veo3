@@ -47,7 +47,7 @@ func FormatOperation(op *veo3.Operation) string {
 	}
 
 	// Metadata if available
-	if op.Metadata != nil && len(op.Metadata) > 0 {
+	if len(op.Metadata) > 0 {
 		output.WriteString("Metadata:\n")
 		for key, value := range op.Metadata {
 			output.WriteString(fmt.Sprintf("  %s: %v\n", key, value))
@@ -183,7 +183,7 @@ func FormatModelList(models []veo3.Model) string {
 func FormatGeneratedVideo(video *veo3.GeneratedVideo) string {
 	var output strings.Builder
 
-	output.WriteString(fmt.Sprintf("✅ Video generated successfully!\n"))
+	output.WriteString("✅ Video generated successfully!\n")
 	output.WriteString(fmt.Sprintf("📁 File: %s\n", video.FilePath))
 	output.WriteString(fmt.Sprintf("📊 Duration: %ds | Resolution: %s | Size: %s\n",
 		video.DurationSeconds,
@@ -222,7 +222,7 @@ func FormatError(err error) string {
 			output.WriteString(fmt.Sprintf("\n💡 %s\n", opErr.Suggestion))
 		}
 
-		if opErr.Details != nil && len(opErr.Details) > 0 {
+		if len(opErr.Details) > 0 {
 			output.WriteString("\nDetails:\n")
 			for key, value := range opErr.Details {
 				output.WriteString(fmt.Sprintf("  %s: %v\n", key, value))

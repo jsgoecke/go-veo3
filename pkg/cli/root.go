@@ -33,10 +33,10 @@ extend existing videos, use reference images, and perform frame interpolation fr
 	cmd.PersistentFlags().Bool("verbose", false, "Enable debug logging")
 	cmd.PersistentFlags().Bool("quiet", false, "Suppress progress output")
 
-	viper.BindPFlag("api-key", cmd.PersistentFlags().Lookup("api-key"))
-	viper.BindPFlag("json", cmd.PersistentFlags().Lookup("json"))
-	viper.BindPFlag("verbose", cmd.PersistentFlags().Lookup("verbose"))
-	viper.BindPFlag("quiet", cmd.PersistentFlags().Lookup("quiet"))
+	_ = viper.BindPFlag("api-key", cmd.PersistentFlags().Lookup("api-key"))
+	_ = viper.BindPFlag("json", cmd.PersistentFlags().Lookup("json"))
+	_ = viper.BindPFlag("verbose", cmd.PersistentFlags().Lookup("verbose"))
+	_ = viper.BindPFlag("quiet", cmd.PersistentFlags().Lookup("quiet"))
 
 	// Add subcommands
 	cmd.AddCommand(newGenerateCmd())
@@ -79,7 +79,5 @@ func initConfig() {
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("VEO3")
 
-	if err := viper.ReadInConfig(); err == nil {
-		// fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-	}
+	_ = viper.ReadInConfig() // Config file is optional, ignore errors
 }

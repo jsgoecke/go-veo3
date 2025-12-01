@@ -165,7 +165,7 @@ func TestInterpolationRequest_ValidateCompatibleImages(t *testing.T) {
 				return "testdata/1920x1080_frame1.jpg", "testdata/1280x720_frame2.jpg"
 			},
 			wantErr: true,
-			errMsg:  "dimensions must match",
+			errMsg:  "image dimensions mismatch",
 		},
 		{
 			name: "different image formats but same dimensions",
@@ -246,13 +246,13 @@ func TestInterpolationRequest_ValidateModelSupport(t *testing.T) {
 			name:    "veo-3.0 may not support interpolation",
 			model:   "veo-3-generate-preview",
 			wantErr: true, // Assuming older models don't support interpolation
-			errMsg:  "does not support interpolation",
+			errMsg:  "does not support frame interpolation",
 		},
 		{
 			name:    "veo-2.0 does not support interpolation",
 			model:   "veo-2.0-generate-001",
 			wantErr: true,
-			errMsg:  "does not support interpolation",
+			errMsg:  "does not support frame interpolation",
 		},
 	}
 

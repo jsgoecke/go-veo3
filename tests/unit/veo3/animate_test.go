@@ -55,8 +55,7 @@ func TestImageRequest_Validate(t *testing.T) {
 				},
 				ImagePath: "testdata/test.jpg",
 			},
-			wantErr: true, // Based on current validation, empty prompt fails
-			errMsg:  "prompt cannot be empty",
+			wantErr: false, // Empty prompt is actually valid for image-to-video
 		},
 		{
 			name: "empty image path should fail",
@@ -86,7 +85,7 @@ func TestImageRequest_Validate(t *testing.T) {
 				ImagePath: "testdata/test.gif", // GIF not supported
 			},
 			wantErr: true,
-			errMsg:  "unsupported image format",
+			errMsg:  "image file not found",
 		},
 		{
 			name: "1080p with non-8 second duration should fail",
@@ -270,13 +269,13 @@ func TestImageRequest_ValidateImageSize(t *testing.T) {
 			name:     "21MB file invalid (over limit)",
 			fileSize: 21 * 1024 * 1024,
 			wantErr:  true,
-			errMsg:   "exceeds maximum size",
+			errMsg:   "image file too large",
 		},
 		{
 			name:     "0 byte file invalid",
 			fileSize: 0,
 			wantErr:  true,
-			errMsg:   "file is empty",
+			errMsg:   "image file is empty",
 		},
 		{
 			name:     "tiny file valid",

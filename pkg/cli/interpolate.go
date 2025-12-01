@@ -55,9 +55,9 @@ Images must have identical dimensions.`,
 	// They are fixed at 8s and 16:9 respectively
 
 	// Bind flags to viper for config integration
-	viper.BindPFlag("model", interpolateCmd.Flags().Lookup("model"))
-	viper.BindPFlag("resolution", interpolateCmd.Flags().Lookup("resolution"))
-	viper.BindPFlag("output", interpolateCmd.Flags().Lookup("output"))
+	_ = viper.BindPFlag("model", interpolateCmd.Flags().Lookup("model"))
+	_ = viper.BindPFlag("resolution", interpolateCmd.Flags().Lookup("resolution"))
+	_ = viper.BindPFlag("output", interpolateCmd.Flags().Lookup("output"))
 
 	return interpolateCmd
 }
