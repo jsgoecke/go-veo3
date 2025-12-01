@@ -64,6 +64,11 @@ func (m *Manager) Load() (*Configuration, error) {
 		cfg.APIKey = os.Getenv("GEMINI_API_KEY")
 	}
 
+	// Validate configuration
+	if err := cfg.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid configuration: %w", err)
+	}
+
 	return &cfg, nil
 }
 

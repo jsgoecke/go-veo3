@@ -1,230 +1,237 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/jasongoecke/go-veo3/internal/format"
 	"github.com/jasongoecke/go-veo3/pkg/veo3"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // newModelsCmd creates the models command group
 func newModelsCmd() *cobra.Command {
-	// Create fresh command instance to avoid flag redefinition in tests
-	modelsCmd := &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "models",
-		Short: "List available models and view capabilities",
-		Long: `List available Veo models and view their capabilities and constraints.
+		Short: "List and inspect available Veo models",
+		Long: `List available Veo models and view detailed information about their capabilities.
 
-This command group helps you discover available models, understand their
-capabilities (audio, extension, reference images), and check compatibility
-constraints for different generation types.`,
-		Example: `  # List all available models
-  veo3 models list
-
-  # Get detailed information about a specific model
-  veo3 models info veo-3.1
-
-  # List models that support specific features
-  veo3 models list --feature extension
-  veo3 models list --feature reference-images`,
+Use this to discover which models are available, what features they support,
+and their constraints.`,
 	}
 
-	// Add subcommands
-	modelsCmd.AddCommand(newModelsListCmd())
-	modelsCmd.AddCommand(newModelsInfoCmd())
+	cmd.AddCommand(newModelsListCmd())
+	cmd.AddCommand(newModelsInfoCmd())
 
-	return modelsCmd
+	return cmd
 }
 
-// newModelsListCmd creates the 'models list' command
+// newModelsListCmd creates the models list subcommand
 func newModelsListCmd() *cobra.Command {
+	var jsonFormat bool
+
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List all available models",
-		Long: `List all available Veo models with their basic information.
+		Short: "List all available Veo models",
+		Long: `List all available Veo models with their key capabilities.
 
-Models are shown with their name, version, tier (standard/fast), and key
-capabilities like audio support, extension support, and reference image support.`,
+Shows model ID, name, version, and supported features like audio,
+video extension, and reference images.`,
 		Example: `  # List all models
   veo3 models list
 
   # List models in JSON format
-  veo3 models list --json
-
-  # List only models that support audio
-  veo3 models list --feature audio
-
-  # List only Veo 3.1 models
-  veo3 models list --version 3.1`,
-		RunE: runModelsList,
+  veo3 models list --json`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runModelsList(cmd, jsonFormat)
+		},
 	}
 
-	cmd.Flags().String("feature", "", "Filter by feature (audio, extension, reference-images)")
-	cmd.Flags().String("version", "", "Filter by version (3.1, 3.0, 2.0)")
-	cmd.Flags().String("tier", "", "Filter by tier (standard, fast)")
-	cmd.Flags().Bool("pretty", false, "Pretty-print JSON output (with --json)")
+	cmd.Flags().BoolVar(&jsonFormat, "json", false, "Output in JSON format")
 
 	return cmd
 }
 
-// newModelsInfoCmd creates the 'models info' command
+// newModelsInfoCmd creates the models info subcommand
 func newModelsInfoCmd() *cobra.Command {
+	var jsonFormat bool
+
 	cmd := &cobra.Command{
-		Use:   "info [model-id]",
-		Short: "Get detailed information about a specific model",
-		Long: `Get comprehensive information about a specific Veo model.
+		Use:   "info <model-id>",
+		Short: "Show detailed information about a specific model",
+		Long: `Display detailed specifications for a specific Veo model.
 
-This shows all capabilities, constraints, supported resolutions, durations,
-and any special requirements for the model.`,
-		Example: `  # Get model information
-  veo3 models info veo-3.1
+Shows complete information about model capabilities, constraints,
+supported resolutions, durations, and other technical details.`,
+		Example: `  # Get info about a specific model
+  veo3 models info veo-3.1-generate-preview
 
-  # Get information in JSON format
-  veo3 models info veo-3.1-generate-preview --json
-
-  # Get capabilities summary
-  veo3 models info veo-3.1 --capabilities-only`,
-		Args: cobra.ExactArgs(1),
-		RunE: runModelsInfo,
+  # Get model info in JSON format
+  veo3 models info veo-3.1-generate-preview --json`,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 {
+				return fmt.Errorf("model ID is required\n\nUse 'veo3 models list' to see available models")
+			}
+			if len(args) > 1 {
+				return fmt.Errorf("only one model ID is accepted")
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runModelsInfo(cmd, args[0], jsonFormat)
+		},
 	}
 
-	cmd.Flags().Bool("capabilities-only", false, "Show only capabilities, not constraints")
-	cmd.Flags().Bool("pretty", false, "Pretty-print JSON output (with --json)")
+	cmd.Flags().BoolVar(&jsonFormat, "json", false, "Output in JSON format")
 
 	return cmd
 }
 
-// Command implementations
+// runModelsList lists all available models
+func runModelsList(cmd *cobra.Command, jsonFormat bool) error {
+	models := veo3.ListModels()
 
-func runModelsList(cmd *cobra.Command, args []string) error {
-	featureFilter, _ := cmd.Flags().GetString("feature")
-	versionFilter, _ := cmd.Flags().GetString("version")
-	tierFilter, _ := cmd.Flags().GetString("tier")
-	jsonFormat := viper.GetBool("json")
-	// pretty, _ := cmd.Flags().GetBool("pretty") // TODO: Use for formatted output
-
-	// Get all models
-	allModels := veo3.ListModels()
-
-	// Apply filters
-	var filteredModels []veo3.Model
-	for _, model := range allModels {
-		// Feature filter
-		if featureFilter != "" {
-			switch strings.ToLower(featureFilter) {
-			case "audio":
-				if !model.Capabilities.Audio {
-					continue
-				}
-			case "extension":
-				if !model.Capabilities.Extension {
-					continue
-				}
-			case "reference-images":
-				if !model.Capabilities.ReferenceImages {
-					continue
-				}
-			default:
-				return fmt.Errorf("invalid feature filter: %s (valid: audio, extension, reference-images)", featureFilter)
-			}
-		}
-
-		// Version filter
-		if versionFilter != "" {
-			if model.Version != versionFilter {
-				continue
-			}
-		}
-
-		// Tier filter
-		if tierFilter != "" {
-			if model.Tier != tierFilter {
-				continue
-			}
-		}
-
-		filteredModels = append(filteredModels, model)
-	}
-
-	// Output models
 	if jsonFormat {
-		jsonOutput, err := format.FormatModelListJSON(filteredModels)
+		output := map[string]interface{}{
+			"success": true,
+			"data": map[string]interface{}{
+				"models": models,
+				"count":  len(models),
+			},
+		}
+		data, err := json.MarshalIndent(output, "", "  ")
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to marshal JSON: %w", err)
 		}
-		fmt.Println(jsonOutput)
-	} else {
-		output := format.FormatModelList(filteredModels)
-		fmt.Print(output)
+		cmd.Println(string(data))
+		return nil
 	}
+
+	// Human-readable table output
+	cmd.Println("Available Veo Models:")
+	cmd.Println()
+	cmd.Printf("%-35s %-15s %-8s %s\n", "MODEL ID", "NAME", "VERSION", "CAPABILITIES")
+	cmd.Println(strings.Repeat("-", 100))
+
+	for _, model := range models {
+		capabilities := []string{}
+		if model.Capabilities.Audio {
+			capabilities = append(capabilities, "Audio")
+		}
+		if model.Capabilities.Extension {
+			capabilities = append(capabilities, "Extension")
+		}
+		if model.Capabilities.ReferenceImages {
+			capabilities = append(capabilities, "Reference Images")
+		}
+		if len(capabilities) == 0 {
+			capabilities = append(capabilities, "Basic")
+		}
+
+		cmd.Printf("%-35s %-15s %-8s %s\n",
+			model.ID,
+			model.Name,
+			model.Version,
+			strings.Join(capabilities, ", "))
+	}
+
+	cmd.Println()
+	cmd.Printf("Total: %d models\n", len(models))
+	cmd.Println()
+	cmd.Println("Use 'veo3 models info <model-id>' for detailed information about a specific model")
 
 	return nil
 }
 
-func runModelsInfo(cmd *cobra.Command, args []string) error {
-	modelID := args[0]
-
-	capabilitiesOnly, _ := cmd.Flags().GetBool("capabilities-only")
-	jsonFormat := viper.GetBool("json")
-	// pretty, _ := cmd.Flags().GetBool("pretty") // TODO: Use for formatted output
-
-	// Get model
-	model, exists := veo3.GetModel(modelID)
-	if !exists {
-		return fmt.Errorf("model not found: %s", modelID)
+// runModelsInfo displays detailed information about a specific model
+func runModelsInfo(cmd *cobra.Command, modelID string, jsonFormat bool) error {
+	model, found := veo3.GetModel(modelID)
+	if !found {
+		return fmt.Errorf("model not found: %s\n\nUse 'veo3 models list' to see available models", modelID)
 	}
 
-	// Output model information
 	if jsonFormat {
-		if capabilitiesOnly {
-			jsonOutput, err := format.FormatGenericJSON(model.Capabilities)
-			if err != nil {
-				return err
-			}
-			fmt.Println(jsonOutput)
-		} else {
-			jsonOutput, err := format.FormatModelJSON(model)
-			if err != nil {
-				return err
-			}
-			fmt.Println(jsonOutput)
+		output := map[string]interface{}{
+			"success": true,
+			"data": map[string]interface{}{
+				"model": model,
+			},
 		}
-	} else {
-		if capabilitiesOnly {
-			// Show only capabilities
-			fmt.Printf("Model: %s\n", model.Name)
-			fmt.Printf("Capabilities:\n")
-			fmt.Printf("  Audio: %s\n", formatBool(model.Capabilities.Audio))
-			fmt.Printf("  Extension: %s\n", formatBool(model.Capabilities.Extension))
-			fmt.Printf("  Reference Images: %s\n", formatBool(model.Capabilities.ReferenceImages))
-			fmt.Printf("  Resolutions: %s\n", strings.Join(model.Capabilities.Resolutions, ", "))
-			fmt.Printf("  Durations: %s\n", formatIntSlice(model.Capabilities.Durations))
-		} else {
-			// Show full model information
-			output := format.FormatModel(model)
-			fmt.Print(output)
+		data, err := json.MarshalIndent(output, "", "  ")
+		if err != nil {
+			return fmt.Errorf("failed to marshal JSON: %w", err)
 		}
+		cmd.Println(string(data))
+		return nil
 	}
+
+	// Human-readable detailed output
+	cmd.Println()
+	cmd.Printf("Model: %s\n", model.Name)
+	cmd.Printf("ID: %s\n", model.ID)
+	cmd.Printf("Version: %s\n", model.Version)
+	cmd.Printf("Tier: %s\n", model.Tier)
+	cmd.Println()
+
+	// Capabilities
+	cmd.Println("Capabilities:")
+	cmd.Printf("  Audio Generation:        %s\n", formatBool(model.Capabilities.Audio))
+	cmd.Printf("  Video Extension:         %s\n", formatBool(model.Capabilities.Extension))
+	cmd.Printf("  Reference Images:        %s\n", formatBool(model.Capabilities.ReferenceImages))
+	cmd.Println()
+
+	// Supported configurations
+	cmd.Println("Supported Configurations:")
+	cmd.Printf("  Resolutions:             %s\n", strings.Join(model.Capabilities.Resolutions, ", "))
+	cmd.Printf("  Durations:               %s\n", formatDurations(model.Capabilities.Durations))
+	cmd.Println()
+
+	// Constraints
+	if model.Capabilities.ReferenceImages {
+		cmd.Println("Constraints:")
+		cmd.Printf("  Max Reference Images:    %d\n", model.Constraints.MaxReferenceImages)
+		if model.Constraints.RequiredAspectRatio != "" {
+			cmd.Printf("  Required Aspect Ratio:   %s\n", model.Constraints.RequiredAspectRatio)
+		}
+		if model.Constraints.RequiredDuration > 0 {
+			cmd.Printf("  Required Duration:       %ds\n", model.Constraints.RequiredDuration)
+		}
+		cmd.Println()
+	}
+
+	// Usage notes
+	cmd.Println("Usage Notes:")
+	if model.Capabilities.Audio {
+		cmd.Println("  • Supports native audio generation with sound effects and ambience")
+	}
+	if model.Capabilities.Extension {
+		cmd.Println("  • Can extend previously generated videos up to 7 seconds")
+	}
+	if model.Capabilities.ReferenceImages {
+		cmd.Printf("  • Supports up to %d reference images for style/content guidance\n", model.Constraints.MaxReferenceImages)
+		cmd.Println("  • Reference images require 8s duration and 16:9 aspect ratio")
+	}
+	if !model.Capabilities.Audio && !model.Capabilities.Extension && !model.Capabilities.ReferenceImages {
+		cmd.Println("  • Basic text-to-video generation")
+	}
+	cmd.Println()
 
 	return nil
 }
 
-// Helper functions
-
+// formatBool formats a boolean as a checkmark or X
 func formatBool(b bool) string {
 	if b {
-		return "Yes"
+		return "✓ Yes"
 	}
-	return "No"
+	return "✗ No"
 }
 
-func formatIntSlice(ints []int) string {
-	strs := make([]string, len(ints))
-	for i, v := range ints {
-		strs[i] = fmt.Sprintf("%ds", v)
+// formatDurations formats a list of durations with "seconds" suffix
+func formatDurations(durations []int) string {
+	parts := make([]string, len(durations))
+	for i, d := range durations {
+		parts[i] = fmt.Sprintf("%ds", d)
 	}
-	return strings.Join(strs, ", ")
+	return strings.Join(parts, ", ")
 }
