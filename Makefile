@@ -40,13 +40,24 @@ build-all: pre-build ## Build for all platforms and architectures
 run: ## Run the application
 	go run ./cmd/veo3
 
-test-unit: ## Run unit tests only
+test-unit: ## Run unit tests only (fast, no API key needed)
 	@echo "Running unit tests..."
 	go test -v ./tests/unit/...
 
-test: ## Run all tests (unit + integration)
-	@echo "Running all tests..."
-	go test -v ./...
+test-integration: ## Run integration tests (requires RUN_INTEGRATION_TESTS=1 and API key)
+	@echo "Running integration tests..."
+	@echo "Note: These tests require RUN_INTEGRATION_TESTS=1 and a valid API key"
+	RUN_INTEGRATION_TESTS=1 go test -v ./tests/integration/...
+
+test: test-unit ## Run all safe tests (unit tests only - use test-all for integration)
+	@echo "✓ All unit tests passed"
+
+test-all: ## Run ALL tests including integration (requires API key)
+	@echo "Running unit tests..."
+	go test -v ./tests/unit/...
+	@echo ""
+	@echo "Running integration tests..."
+	RUN_INTEGRATION_TESTS=1 go test -v ./tests/integration/...
 
 test-race: ## Run tests with race detector
 	@echo "Running tests with race detector..."
