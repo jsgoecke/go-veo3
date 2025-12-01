@@ -19,7 +19,7 @@ func TestGenerationRequest_Validate(t *testing.T) {
 			name: "valid request with defaults",
 			request: &veo3.GenerationRequest{
 				Prompt:          "A beautiful sunset over the ocean",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "720p",
 				DurationSeconds: 6,
@@ -30,7 +30,7 @@ func TestGenerationRequest_Validate(t *testing.T) {
 			name: "valid request with 1080p and 8 seconds",
 			request: &veo3.GenerationRequest{
 				Prompt:          "A cityscape at night",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "1080p",
 				DurationSeconds: 8,
@@ -41,7 +41,7 @@ func TestGenerationRequest_Validate(t *testing.T) {
 			name: "valid request with 9:16 aspect ratio",
 			request: &veo3.GenerationRequest{
 				Prompt:          "A vertical video",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "9:16",
 				Resolution:      "720p",
 				DurationSeconds: 4,
@@ -52,7 +52,7 @@ func TestGenerationRequest_Validate(t *testing.T) {
 			name: "empty prompt should fail",
 			request: &veo3.GenerationRequest{
 				Prompt:          "",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "720p",
 				DurationSeconds: 6,
@@ -64,7 +64,7 @@ func TestGenerationRequest_Validate(t *testing.T) {
 			name: "prompt too long should fail",
 			request: &veo3.GenerationRequest{
 				Prompt:          generateLongPrompt(1025), // Over 1024 token limit
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "720p",
 				DurationSeconds: 6,
@@ -88,7 +88,7 @@ func TestGenerationRequest_Validate(t *testing.T) {
 			name: "invalid aspect ratio should fail",
 			request: &veo3.GenerationRequest{
 				Prompt:          "Test prompt",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "4:3",
 				Resolution:      "720p",
 				DurationSeconds: 6,
@@ -100,7 +100,7 @@ func TestGenerationRequest_Validate(t *testing.T) {
 			name: "invalid resolution should fail",
 			request: &veo3.GenerationRequest{
 				Prompt:          "Test prompt",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "4K",
 				DurationSeconds: 6,
@@ -112,7 +112,7 @@ func TestGenerationRequest_Validate(t *testing.T) {
 			name: "invalid duration should fail",
 			request: &veo3.GenerationRequest{
 				Prompt:          "Test prompt",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "720p",
 				DurationSeconds: 5, // Not 4, 6, or 8
@@ -124,7 +124,7 @@ func TestGenerationRequest_Validate(t *testing.T) {
 			name: "1080p with non-8 second duration should fail",
 			request: &veo3.GenerationRequest{
 				Prompt:          "Test prompt",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "1080p",
 				DurationSeconds: 6, // 1080p requires 8 seconds
@@ -152,7 +152,7 @@ func TestGenerationRequest_ValidateWithNegativePrompt(t *testing.T) {
 	req := &veo3.GenerationRequest{
 		Prompt:          "A beautiful landscape",
 		NegativePrompt:  "avoid people, cars",
-		Model:           "veo-3.1",
+		Model:           "veo-3.1-generate-preview",
 		AspectRatio:     "16:9",
 		Resolution:      "720p",
 		DurationSeconds: 6,
@@ -166,7 +166,7 @@ func TestGenerationRequest_ValidateWithSeed(t *testing.T) {
 	seed := 12345
 	req := &veo3.GenerationRequest{
 		Prompt:          "A beautiful landscape",
-		Model:           "veo-3.1",
+		Model:           "veo-3.1-generate-preview",
 		AspectRatio:     "16:9",
 		Resolution:      "720p",
 		DurationSeconds: 6,
@@ -194,7 +194,7 @@ func TestGenerationRequest_ValidatePersonGeneration(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			req := &veo3.GenerationRequest{
 				Prompt:           "A beautiful landscape",
-				Model:            "veo-3.1",
+				Model:            "veo-3.1-generate-preview",
 				AspectRatio:      "16:9",
 				Resolution:       "720p",
 				DurationSeconds:  6,
@@ -228,7 +228,7 @@ func TestGenerationRequest_JSONTags(t *testing.T) {
 	// The actual implementation should have these tags
 	req := &veo3.GenerationRequest{
 		Prompt:          "Test",
-		Model:           "veo-3.1",
+		Model:           "veo-3.1-generate-preview",
 		AspectRatio:     "16:9",
 		Resolution:      "720p",
 		DurationSeconds: 6,

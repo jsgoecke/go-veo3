@@ -20,7 +20,7 @@ func TestReferenceImageRequest_Validate(t *testing.T) {
 			request: &veo3.ReferenceImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Generate video using this style",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9", // Required for reference images
 					Resolution:      "720p",
 					DurationSeconds: 8, // Required for reference images
@@ -34,7 +34,7 @@ func TestReferenceImageRequest_Validate(t *testing.T) {
 			request: &veo3.ReferenceImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Create video with these style references",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 8,
@@ -52,7 +52,7 @@ func TestReferenceImageRequest_Validate(t *testing.T) {
 			request: &veo3.ReferenceImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Style transfer with three references",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 8,
@@ -70,7 +70,7 @@ func TestReferenceImageRequest_Validate(t *testing.T) {
 			request: &veo3.ReferenceImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Generate video",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 8,
@@ -85,7 +85,7 @@ func TestReferenceImageRequest_Validate(t *testing.T) {
 			request: &veo3.ReferenceImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Too many references",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 8,
@@ -105,7 +105,7 @@ func TestReferenceImageRequest_Validate(t *testing.T) {
 			request: &veo3.ReferenceImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Reference with wrong duration",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 6, // Must be 8s for reference images
@@ -120,7 +120,7 @@ func TestReferenceImageRequest_Validate(t *testing.T) {
 			request: &veo3.ReferenceImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Reference with wrong aspect ratio",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "9:16", // Must be 16:9 for reference images
 					Resolution:      "720p",
 					DurationSeconds: 8,
@@ -135,7 +135,7 @@ func TestReferenceImageRequest_Validate(t *testing.T) {
 			request: &veo3.ReferenceImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Reference with old model",
-					Model:           "veo-3.0", // Only 3.1 supports reference images
+					Model:           "veo-3-generate-preview", // Only 3.1 supports reference images
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 8,
@@ -150,7 +150,7 @@ func TestReferenceImageRequest_Validate(t *testing.T) {
 			request: &veo3.ReferenceImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Empty reference path",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 8,
@@ -309,7 +309,7 @@ func TestReferenceImageRequest_ModelConstraints(t *testing.T) {
 	}{
 		{
 			name:    "veo-3.1 supports reference images",
-			model:   "veo-3.1",
+			model:   "veo-3.1-generate-preview",
 			wantErr: false,
 		},
 		{
@@ -319,7 +319,7 @@ func TestReferenceImageRequest_ModelConstraints(t *testing.T) {
 		},
 		{
 			name:    "veo-3.0 does not support reference images",
-			model:   "veo-3.0",
+			model:   "veo-3-generate-preview",
 			wantErr: true,
 			errMsg:  "does not support reference images",
 		},
@@ -349,7 +349,7 @@ func TestReferenceImageRequest_APIPayload(t *testing.T) {
 	request := &veo3.ReferenceImageRequest{
 		GenerationRequest: veo3.GenerationRequest{
 			Prompt:          "Generate video with these style references",
-			Model:           "veo-3.1",
+			Model:           "veo-3.1-generate-preview",
 			AspectRatio:     "16:9",
 			Resolution:      "720p",
 			DurationSeconds: 8,

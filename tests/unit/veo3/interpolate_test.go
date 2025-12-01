@@ -20,7 +20,7 @@ func TestInterpolationRequest_Validate(t *testing.T) {
 			request: &veo3.InterpolationRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Smooth transition between frames",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9", // Required for interpolation
 					Resolution:      "720p",
 					DurationSeconds: 8, // Required for interpolation
@@ -35,7 +35,7 @@ func TestInterpolationRequest_Validate(t *testing.T) {
 			request: &veo3.InterpolationRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "", // Should be optional
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 8,
@@ -50,7 +50,7 @@ func TestInterpolationRequest_Validate(t *testing.T) {
 			request: &veo3.InterpolationRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Test interpolation",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 8,
@@ -66,7 +66,7 @@ func TestInterpolationRequest_Validate(t *testing.T) {
 			request: &veo3.InterpolationRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Test interpolation",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 8,
@@ -82,7 +82,7 @@ func TestInterpolationRequest_Validate(t *testing.T) {
 			request: &veo3.InterpolationRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Test interpolation",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 6, // Interpolation requires 8s
@@ -98,7 +98,7 @@ func TestInterpolationRequest_Validate(t *testing.T) {
 			request: &veo3.InterpolationRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Test interpolation",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "9:16", // Interpolation requires 16:9
 					Resolution:      "720p",
 					DurationSeconds: 8,
@@ -114,7 +114,7 @@ func TestInterpolationRequest_Validate(t *testing.T) {
 			request: &veo3.InterpolationRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Test interpolation",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 8,
@@ -200,7 +200,7 @@ func TestInterpolationRequest_APIPayload(t *testing.T) {
 	request := &veo3.InterpolationRequest{
 		GenerationRequest: veo3.GenerationRequest{
 			Prompt:          "Smooth morphing transition",
-			Model:           "veo-3.1",
+			Model:           "veo-3.1-generate-preview",
 			AspectRatio:     "16:9",
 			Resolution:      "720p",
 			DurationSeconds: 8,
@@ -239,12 +239,12 @@ func TestInterpolationRequest_ValidateModelSupport(t *testing.T) {
 	}{
 		{
 			name:    "veo-3.1 supports interpolation",
-			model:   "veo-3.1",
+			model:   "veo-3.1-generate-preview",
 			wantErr: false,
 		},
 		{
 			name:    "veo-3.0 may not support interpolation",
-			model:   "veo-3.0",
+			model:   "veo-3-generate-preview",
 			wantErr: true, // Assuming older models don't support interpolation
 			errMsg:  "does not support interpolation",
 		},

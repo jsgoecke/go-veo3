@@ -322,12 +322,3 @@ func generateID() string {
 	// Simple implementation for now, using nanoseconds
 	return fmt.Sprintf("%d", time.Now().UnixNano())
 }
-
-// ListModels returns the list of available models
-func ListModels() []Model {
-	models := make([]Model, 0, len(ModelRegistry))
-	for _, model := range ModelRegistry {
-		models = append(models, model)
-	}
-	return models
-}

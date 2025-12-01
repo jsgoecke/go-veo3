@@ -230,9 +230,9 @@
 
 ### Tests for User Story 7 (MANDATORY) ⚠️
 
-- [ ] T083 [P] [US7] Write unit tests for model registry in tests/unit/veo3/models_test.go
-- [ ] T084 [P] [US7] Write unit tests for model validation logic in tests/unit/veo3/models_test.go
-- [ ] T085 [P] [US7] Write integration tests for models commands in tests/integration/cli_test.go
+- [x] T083 [P] [US7] Write unit tests for model registry in tests/unit/veo3/models_test.go
+- [x] T084 [P] [US7] Write unit tests for model validation logic in tests/unit/veo3/models_validation_test.go
+- [x] T085 [P] [US7] Write integration tests for models commands in tests/integration/cli_test.go
 
 ### Implementation for User Story 7
 
