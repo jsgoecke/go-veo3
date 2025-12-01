@@ -208,23 +208,23 @@ func (c *Client) GenerateVideo(ctx context.Context, request *GenerationRequest) 
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
 
-	// Build API payload
+	// Build API payload with snake_case field names (Google REST API standard)
 	payload := map[string]interface{}{
-		"prompt":          request.Prompt,
-		"aspectRatio":     request.AspectRatio,
-		"resolution":      request.Resolution,
-		"durationSeconds": fmt.Sprintf("%d", request.DurationSeconds),
+		"prompt":           request.Prompt,
+		"aspect_ratio":     request.AspectRatio,
+		"resolution":       request.Resolution,
+		"duration_seconds": fmt.Sprintf("%d", request.DurationSeconds),
 	}
 
 	// Add optional fields
 	if request.NegativePrompt != "" {
-		payload["negativePrompt"] = request.NegativePrompt
+		payload["negative_prompt"] = request.NegativePrompt
 	}
 	if request.Seed != nil {
 		payload["seed"] = *request.Seed
 	}
 	if request.PersonGeneration != "" {
-		payload["personGeneration"] = request.PersonGeneration
+		payload["person_generation"] = request.PersonGeneration
 	}
 
 	// Marshal payload
