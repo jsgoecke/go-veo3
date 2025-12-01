@@ -58,10 +58,11 @@ jobs:
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v2
-        # Skip SARIF upload when running locally with act (no token available)
-        if: always() && github.event_name != 'workflow_dispatch' && env.ACT != 'true'
+        # Skip when running locally with act (no GitHub token available)
+        if: always() && !env.ACT
         with:
           sarif_file: gosec.sarif
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   test:
     name: Unit Tests
