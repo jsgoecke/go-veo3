@@ -257,8 +257,8 @@
 
 - [x] T092 [P] [US8] Write unit tests for configuration loading in tests/unit/config/manager_test.go
 - [x] T093 [P] [US8] Write unit tests for configuration saving in tests/unit/config/manager_test.go
-- [ ] T094 [P] [US8] Write integration tests for config commands in tests/integration/cli_test.go
-- [ ] T095 [P] [US8] Write tests for configuration precedence (flag > env > file) in tests/integration/config_test.go
+- [x] T094 [P] [US8] Write integration tests for config commands in tests/integration/cli_test.go
+- [x] T095 [P] [US8] Write tests for configuration precedence (flag > env > file) in tests/integration/config_test.go
 
 ### Implementation for User Story 8
 

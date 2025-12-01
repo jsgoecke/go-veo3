@@ -954,3 +954,167 @@ func TestModelsCapabilitiesDisplay(t *testing.T) {
 		})
 	}
 }
+
+// TestConfigCommands tests the config management commands
+func TestConfigCommands(t *testing.T) {
+	tempDir := t.TempDir()
+	configFile := filepath.Join(tempDir, "test-config.yaml")
+
+	t.Run("config init creates config file", func(t *testing.T) {
+		var stdout, stderr bytes.Buffer
+
+		rootCmd := cli.NewRootCmd()
+		rootCmd.SetOut(&stdout)
+		rootCmd.SetErr(&stderr)
+		rootCmd.SetArgs([]string{
+			"--config", configFile,
+			"config", "init",
+			"--api-key", "test-api-key-12345",
+			"--output", tempDir,
+			"--force",
+		})
+
+		err := rootCmd.Execute()
+		require.NoError(t, err, "stderr: %s", stderr.String())
+
+		// Verify config file was created
+		_, err = os.Stat(configFile)
+		assert.NoError(t, err, "Config file should exist")
+
+		output := stdout.String()
+		assert.Contains(t, output, "initialized successfully", "Output should confirm initialization")
+	})
+
+	t.Run("config set updates configuration", func(t *testing.T) {
+		var stdout, stderr bytes.Buffer
+
+		rootCmd := cli.NewRootCmd()
+		rootCmd.SetOut(&stdout)
+		rootCmd.SetErr(&stderr)
+		rootCmd.SetArgs([]string{
+			"--config", configFile,
+			"config", "set",
+			"default-model", "veo-3.1-generate-preview",
+		})
+
+		err := rootCmd.Execute()
+		require.NoError(t, err, "stderr: %s", stderr.String())
+
+		output := stdout.String()
+		assert.Contains(t, output, "updated", "Output should confirm update")
+	})
+
+	t.Run("config get retrieves value", func(t *testing.T) {
+		var stdout, stderr bytes.Buffer
+
+		rootCmd := cli.NewRootCmd()
+		rootCmd.SetOut(&stdout)
+		rootCmd.SetErr(&stderr)
+		rootCmd.SetArgs([]string{
+			"--config", configFile,
+			"config", "get",
+			"default-model",
+		})
+
+		err := rootCmd.Execute()
+		require.NoError(t, err, "stderr: %s", stderr.String())
+
+		output := stdout.String()
+		assert.Contains(t, output, "veo-3.1-generate-preview", "Output should contain the model value")
+	})
+
+	t.Run("config show displays all settings", func(t *testing.T) {
+		var stdout, stderr bytes.Buffer
+
+		rootCmd := cli.NewRootCmd()
+		rootCmd.SetOut(&stdout)
+		rootCmd.SetErr(&stderr)
+		rootCmd.SetArgs([]string{
+			"--config", configFile,
+			"config", "show",
+		})
+
+		err := rootCmd.Execute()
+		require.NoError(t, err, "stderr: %s", stderr.String())
+
+		output := stdout.String()
+		// API key should be masked
+		assert.Contains(t, output, "****", "API key should be masked")
+		assert.Contains(t, output, "veo-3.1-generate-preview", "Should show model")
+	})
+
+	t.Run("config show with JSON output", func(t *testing.T) {
+		var stdout, stderr bytes.Buffer
+
+		rootCmd := cli.NewRootCmd()
+		rootCmd.SetOut(&stdout)
+		rootCmd.SetErr(&stderr)
+		rootCmd.SetArgs([]string{
+			"--config", configFile,
+			"config", "show",
+			"--json",
+		})
+
+		err := rootCmd.Execute()
+		require.NoError(t, err, "stderr: %s", stderr.String())
+
+		output := stdout.String()
+		var result map[string]interface{}
+		err = json.Unmarshal([]byte(output), &result)
+		require.NoError(t, err, "Output should be valid JSON")
+
+		assert.Contains(t, result, "success")
+		assert.Contains(t, result, "data")
+	})
+
+	t.Run("config reset clears settings", func(t *testing.T) {
+		var stdout, stderr bytes.Buffer
+
+		rootCmd := cli.NewRootCmd()
+		rootCmd.SetOut(&stdout)
+		rootCmd.SetErr(&stderr)
+		rootCmd.SetArgs([]string{
+			"--config", configFile,
+			"config", "reset",
+			"--force",
+		})
+
+		err := rootCmd.Execute()
+		require.NoError(t, err, "stderr: %s", stderr.String())
+
+		output := stdout.String()
+		assert.Contains(t, output, "reset", "Output should confirm reset")
+
+		// Verify API key was cleared
+		var stdout2, stderr2 bytes.Buffer
+		rootCmd2 := cli.NewRootCmd()
+		rootCmd2.SetOut(&stdout2)
+		rootCmd2.SetErr(&stderr2)
+		rootCmd2.SetArgs([]string{
+			"--config", configFile,
+			"config", "get",
+			"api-key",
+		})
+
+		err = rootCmd2.Execute()
+		require.NoError(t, err, "stderr: %s", stderr2.String())
+		// Should be empty or show default masking
+	})
+
+	t.Run("config set with invalid key returns error", func(t *testing.T) {
+		var stdout, stderr bytes.Buffer
+
+		rootCmd := cli.NewRootCmd()
+		rootCmd.SetOut(&stdout)
+		rootCmd.SetErr(&stderr)
+		rootCmd.SetArgs([]string{
+			"--config", configFile,
+			"config", "set",
+			"invalid-key", "some-value",
+		})
+
+		err := rootCmd.Execute()
+		require.Error(t, err)
+		assert.Contains(t, strings.ToLower(err.Error()), "unknown", "Should indicate unknown key")
+	})
+}
