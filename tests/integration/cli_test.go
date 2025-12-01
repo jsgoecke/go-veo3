@@ -18,16 +18,19 @@ import (
 
 // TestGenerateCommand_FullFlow tests the complete generate command flow
 func TestGenerateCommand_FullFlow(t *testing.T) {
-	// Skip this test in CI/CD or if using fake API keys
-	// This test is designed to hit the real API, so we skip it in automated testing
+	// Skip this test unless explicitly requested with RUN_INTEGRATION_TESTS=1
+	// This test is designed to hit the real API and requires valid credentials
+	if os.Getenv("RUN_INTEGRATION_TESTS") != "1" {
+		t.Skip("Skipping integration test - set RUN_INTEGRATION_TESTS=1 to run")
+	}
+
 	apiKey := os.Getenv("VEO3_API_KEY")
 	if apiKey == "" {
 		apiKey = os.Getenv("GEMINI_API_KEY")
 	}
 
-	// Skip if no API key or if it looks like a test/fake key
-	if apiKey == "" || strings.Contains(apiKey, "fake") || strings.Contains(apiKey, "test") || os.Getenv("CI") != "" {
-		t.Skip("Skipping real API test in CI/CD or with fake API keys")
+	if apiKey == "" {
+		t.Skip("Skipping integration test - no API key found")
 	}
 
 	tests := []struct {

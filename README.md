@@ -424,6 +424,14 @@ make check
 # Run tests
 make test
 
+# Test GitHub Actions workflows locally with act
+make act-install  # Install act (one-time setup)
+make act-test     # Run complete CI/CD pipeline locally
+make act-lint     # Run just the lint job
+make act-unit     # Run just the unit tests job
+make act-security # Run just the security scan job
+make act-build    # Run just the build job
+
 # Run with coverage (enforces 80% minimum)
 make test-coverage
 
@@ -471,19 +479,31 @@ go-veo3/
 
 ### Running Tests
 
+The project has separate test targets for different purposes:
+
 ```bash
-# All tests
-go test ./...
+# Unit tests only (fast, no API key needed) - Use this for development
+make test
 
-# With coverage
-go test -coverprofile=coverage.out ./...
-go tool cover -html=coverage.out
+# Run all quality checks (lint + security + unit tests)
+make check
 
-# Specific package
-go test ./pkg/veo3/...
+# With coverage (enforces 80% minimum)
+make coverage
 
-# Integration tests only
-go test ./tests/integration/...
+# Integration tests (requires RUN_INTEGRATION_TESTS=1 and API key)
+make test-integration
+
+# All tests including integration
+make test-all
+```
+
+**Important**: The CI/CD pipeline and `make build` only run unit tests. Integration tests require a real API key and are opt-in only via `RUN_INTEGRATION_TESTS=1`.
+
+```bash
+# Run specific test suites directly with Go
+go test ./tests/unit/...           # Unit tests only
+go test ./tests/integration/...    # Integration tests (may need API key)
 ```
 
 ## API Rate Limits
