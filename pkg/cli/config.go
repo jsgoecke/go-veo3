@@ -11,17 +11,19 @@ import (
 	"github.com/spf13/viper"
 )
 
-// configCmd represents the config command group
-var configCmd = &cobra.Command{
-	Use:   "config",
-	Short: "Manage CLI configuration and preferences",
-	Long: `Manage CLI configuration including API credentials, defaults, and preferences.
+// newConfigCmd creates the config command group
+func newConfigCmd() *cobra.Command {
+	// Create fresh command instance to avoid flag redefinition in tests
+	configCmd := &cobra.Command{
+		Use:   "config",
+		Short: "Manage CLI configuration and preferences",
+		Long: `Manage CLI configuration including API credentials, defaults, and preferences.
 
 Configuration is stored in YAML format with secure file permissions.
 The config file location follows XDG Base Directory specification:
 - Linux/macOS: ~/.config/veo3/config.yaml
 - Windows: %APPDATA%\veo3\config.yaml`,
-	Example: `  # Initialize configuration interactively
+		Example: `  # Initialize configuration interactively
   veo3 config init
 
   # Set API key
@@ -32,10 +34,8 @@ The config file location follows XDG Base Directory specification:
 
   # Reset configuration to defaults
   veo3 config reset`,
-}
+	}
 
-// newConfigCmd creates the config command group
-func newConfigCmd() *cobra.Command {
 	// Add subcommands
 	configCmd.AddCommand(newConfigInitCmd())
 	configCmd.AddCommand(newConfigSetCmd())
@@ -241,14 +241,14 @@ func runConfigInit(cmd *cobra.Command, args []string) error {
 			"success": true,
 			"data": map[string]interface{}{
 				"message":     "Configuration initialized successfully",
-				"config_file": manager.ConfigFile,
+				"config_file": manager.ConfigFile(),
 			},
 		}
 		jsonOutput, _ := format.FormatGenericJSON(result)
 		fmt.Println(jsonOutput)
 	} else {
 		fmt.Printf("✓ Configuration initialized successfully\n")
-		fmt.Printf("Config file: %s\n", manager.ConfigFile)
+		fmt.Printf("Config file: %s\n", manager.ConfigFile())
 		fmt.Printf("\nNext steps:\n")
 		fmt.Printf("1. Set your API key: veo3 config set api-key YOUR_API_KEY\n")
 		fmt.Printf("2. Generate your first video: veo3 generate --prompt 'A beautiful sunset'\n")
@@ -413,7 +413,7 @@ func runConfigShow(cmd *cobra.Command, args []string) error {
 		fmt.Println(jsonOutput)
 	} else {
 		// Human-readable format
-		fmt.Printf("Configuration File: %s\n\n", manager.ConfigFile)
+		fmt.Printf("Configuration File: %s\n\n", manager.ConfigFile())
 
 		apiKey := cfg.APIKey
 		if !showSensitive && apiKey != "" {

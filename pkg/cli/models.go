@@ -10,16 +10,18 @@ import (
 	"github.com/spf13/viper"
 )
 
-// modelsCmd represents the models command group
-var modelsCmd = &cobra.Command{
-	Use:   "models",
-	Short: "List available models and view capabilities",
-	Long: `List available Veo models and view their capabilities and constraints.
+// newModelsCmd creates the models command group
+func newModelsCmd() *cobra.Command {
+	// Create fresh command instance to avoid flag redefinition in tests
+	modelsCmd := &cobra.Command{
+		Use:   "models",
+		Short: "List available models and view capabilities",
+		Long: `List available Veo models and view their capabilities and constraints.
 
 This command group helps you discover available models, understand their
 capabilities (audio, extension, reference images), and check compatibility
 constraints for different generation types.`,
-	Example: `  # List all available models
+		Example: `  # List all available models
   veo3 models list
 
   # Get detailed information about a specific model
@@ -28,10 +30,8 @@ constraints for different generation types.`,
   # List models that support specific features
   veo3 models list --feature extension
   veo3 models list --feature reference-images`,
-}
+	}
 
-// newModelsCmd creates the models command group
-func newModelsCmd() *cobra.Command {
 	// Add subcommands
 	modelsCmd.AddCommand(newModelsListCmd())
 	modelsCmd.AddCommand(newModelsInfoCmd())

@@ -10,18 +10,20 @@ import (
 	"github.com/spf13/viper"
 )
 
-// animateCmd represents the animate command
-var animateCmd = &cobra.Command{
-	Use:   "animate [image-path]",
-	Short: "Generate video from image",
-	Long: `Generate a video from an input image using Google Veo 3.1.
+// newAnimateCmd creates the animate command
+func newAnimateCmd() *cobra.Command {
+	// Create fresh command instance to avoid flag redefinition in tests
+	animateCmd := &cobra.Command{
+		Use:   "animate [image-path]",
+		Short: "Generate video from image",
+		Long: `Generate a video from an input image using Google Veo 3.1.
 
 This command takes a static image and animates it into a video.
 The image is used as the first frame of the generated video.
 
 Supported image formats: JPEG, PNG, WebP
 Maximum image size: 20MB`,
-	Example: `  # Animate image with default settings
+		Example: `  # Animate image with default settings
   veo3 animate image.jpg
 
   # Animate with custom prompt
@@ -32,12 +34,10 @@ Maximum image size: 20MB`,
 
   # Save to specific directory
   veo3 animate image.jpg --output ./videos/`,
-	Args: cobra.ExactArgs(1),
-	RunE: runAnimate,
-}
+		Args: cobra.ExactArgs(1),
+		RunE: runAnimate,
+	}
 
-// newAnimateCmd creates the animate command
-func newAnimateCmd() *cobra.Command {
 	// Add flags
 	animateCmd.Flags().StringP("prompt", "p", "", "Optional prompt to enhance the animation")
 	animateCmd.Flags().StringP("resolution", "r", "", "Resolution (720p or 1080p)")
