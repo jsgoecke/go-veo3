@@ -208,23 +208,32 @@ func (c *Client) GenerateVideo(ctx context.Context, request *GenerationRequest) 
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
 
-	// Build API payload with camelCase field names (per API spec)
-	payload := map[string]interface{}{
-		"prompt":          request.Prompt,
+	// Build API payload with correct Vertex AI structure
+	// Based on: https://docs.cloud.google.com/vertex-ai/generative-ai/docs/model-reference/veo-video-generation
+	parameters := map[string]interface{}{
 		"aspectRatio":     request.AspectRatio,
-		"resolution":      request.Resolution,
-		"durationSeconds": fmt.Sprintf("%d", request.DurationSeconds),
+		"durationSeconds": request.DurationSeconds, // INTEGER, not string!
 	}
 
-	// Add optional fields
+	// Add optional parameters
 	if request.NegativePrompt != "" {
-		payload["negativePrompt"] = request.NegativePrompt
+		parameters["negativePrompt"] = request.NegativePrompt
 	}
 	if request.Seed != nil {
-		payload["seed"] = *request.Seed
+		parameters["seed"] = *request.Seed
 	}
 	if request.PersonGeneration != "" {
-		payload["personGeneration"] = request.PersonGeneration
+		parameters["personGeneration"] = request.PersonGeneration
+	}
+
+	// Build full payload with instances and parameters
+	payload := map[string]interface{}{
+		"instances": []map[string]interface{}{
+			{
+				"prompt": request.Prompt,
+			},
+		},
+		"parameters": parameters,
 	}
 
 	// Marshal payload
