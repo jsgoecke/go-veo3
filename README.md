@@ -424,6 +424,14 @@ make check
 # Run tests
 make test
 
+# Test GitHub Actions workflows locally with act
+make act-install  # Install act (one-time setup)
+make act-test     # Run complete CI/CD pipeline locally
+make act-lint     # Run just the lint job
+make act-unit     # Run just the unit tests job
+make act-security # Run just the security scan job
+make act-build    # Run just the build job
+
 # Run with coverage (enforces 80% minimum)
 make test-coverage
 

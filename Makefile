@@ -1,4 +1,4 @@
-.PHONY: build test lint security clean install run coverage pre-build check all help
+.PHONY: build test lint security clean install run coverage pre-build check all help act-install act-test act-lint act-security act-unit act-build
 
 BINARY_NAME=veo3
 VERSION=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
@@ -8,6 +8,10 @@ GOFLAGS=-ldflags "-X github.com/jasongoecke/go-veo3/pkg/cli.Version=$(VERSION) -
 # Build platforms
 PLATFORMS=linux darwin windows
 ARCHITECTURES=amd64 arm64
+
+# GitHub Actions local testing with act
+ACT_VERSION=latest
+ACT_WORKFLOW=.github/workflows/ci.yml
 
 help: ## Show this help
 	@echo "Available targets:"
@@ -109,5 +113,49 @@ clean: ## Clean build artifacts
 
 install: build ## Install the binary
 	go install $(GOFLAGS) ./cmd/veo3
+
+act-install: ## Install act for local GitHub Actions testing
+	@echo "Installing act (GitHub Actions local runner)..."
+	@if command -v act > /dev/null; then \
+		echo "✓ act is already installed: $$(act --version)"; \
+	elif command -v brew > /dev/null; then \
+		echo "Installing via Homebrew..."; \
+		brew install act; \
+	elif [ "$$(uname)" = "Linux" ]; then \
+		echo "Installing via curl..."; \
+		curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash; \
+	else \
+		echo "Please install act manually from: https://github.com/nektos/act"; \
+		exit 1; \
+	fi
+	@echo "✓ act installation complete"
+	@echo "Usage: make act-test  # Run full CI/CD workflow locally"
+
+act-lint: ## Run lint job locally with act
+	@command -v act > /dev/null || (echo "act not installed. Run 'make act-install'"; exit 1)
+	@echo "Running lint job locally with act..."
+	act -j lint -W $(ACT_WORKFLOW)
+
+act-security: ## Run security job locally with act
+	@command -v act > /dev/null || (echo "act not installed. Run 'make act-install'"; exit 1)
+	@echo "Running security job locally with act..."
+	act -j security -W $(ACT_WORKFLOW)
+
+act-unit: ## Run unit tests job locally with act
+	@command -v act > /dev/null || (echo "act not installed. Run 'make act-install'"; exit 1)
+	@echo "Running unit tests job locally with act..."
+	act -j test -W $(ACT_WORKFLOW)
+
+act-build: ## Run build job locally with act
+	@command -v act > /dev/null || (echo "act not installed. Run 'make act-install'"; exit 1)
+	@echo "Running build job locally with act..."
+	act -j build -W $(ACT_WORKFLOW)
+
+act-test: ## Run complete CI/CD workflow locally with act
+	@command -v act > /dev/null || (echo "act not installed. Run 'make act-install'"; exit 1)
+	@echo "Running complete CI/CD workflow locally with act..."
+	@echo "This will run: lint → security → test → build"
+	@echo "Note: This may take several minutes..."
+	act -W $(ACT_WORKFLOW)
 
 .DEFAULT_GOAL := help
