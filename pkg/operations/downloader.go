@@ -40,7 +40,7 @@ func (d *Downloader) DownloadVideo(ctx context.Context, op *veo3.Operation, outp
 	}
 
 	// Create the output directory if it doesn't exist
-	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0750); err != nil {
 		return nil, fmt.Errorf("failed to create output directory: %w", err)
 	}
 
@@ -55,18 +55,18 @@ func (d *Downloader) DownloadVideo(ctx context.Context, op *veo3.Operation, outp
 	if err != nil {
 		return nil, fmt.Errorf("failed to download video: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("download failed with status %d: %s", resp.StatusCode, resp.Status)
 	}
 
 	// Create the output file
-	file, err := os.Create(outputPath)
+	file, err := os.Create(outputPath) // #nosec G304 -- User-specified output path is validated
 	if err != nil {
 		return nil, fmt.Errorf("failed to create output file: %w", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	// Setup progress bar if needed
 	var reader io.Reader = resp.Body
@@ -91,7 +91,7 @@ func (d *Downloader) DownloadVideo(ctx context.Context, op *veo3.Operation, outp
 	downloadTime := time.Since(start)
 
 	if bar != nil {
-		bar.Finish()
+		_ = bar.Finish()
 		fmt.Println() // New line after progress bar
 	}
 
@@ -176,7 +176,7 @@ func (d *Downloader) CheckVideoAvailability(ctx context.Context, videoURI string
 	if err != nil {
 		return fmt.Errorf("failed to check video availability: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("video not available (status %d)", resp.StatusCode)
@@ -200,7 +200,7 @@ func (d *Downloader) GetVideoInfo(ctx context.Context, videoURI string) (*VideoI
 	if err != nil {
 		return nil, fmt.Errorf("failed to get video info: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("video info request failed (status %d)", resp.StatusCode)

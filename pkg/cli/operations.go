@@ -166,13 +166,6 @@ progress is lost.`,
 // Command implementations
 
 func runOperationsList(cmd *cobra.Command, args []string) error {
-	// Load configuration
-	manager := config.NewManager("")
-	cfg, _ := manager.Load()
-	if cfg == nil {
-		cfg = &config.Configuration{OutputDirectory: "."}
-	}
-
 	// Create operations manager (without client for listing stored operations)
 	opsManager := operations.NewManager(nil)
 
@@ -372,7 +365,7 @@ func runOperationsCancel(cmd *cobra.Command, args []string) error {
 		if confirm && !jsonFormat {
 			fmt.Printf("Cancel %d active operations? (y/N): ", len(activeOps))
 			var response string
-			fmt.Scanln(&response)
+			_, _ = fmt.Scanln(&response)
 			if strings.ToLower(response) != "y" && strings.ToLower(response) != "yes" {
 				fmt.Println("Cancelled")
 				return nil

@@ -1,5 +1,10 @@
 # Veo3 CLI
 
+[![CI/CD Pipeline](https://github.com/jasongoecke/go-veo3/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/jasongoecke/go-veo3/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jasongoecke/go-veo3)](https://goreportcard.com/report/github.com/jasongoecke/go-veo3)
+[![codecov](https://codecov.io/gh/jasongoecke/go-veo3/branch/main/graph/badge.svg)](https://codecov.io/gh/jasongoecke/go-veo3)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A command-line interface for Google's Veo 3.1 video generation API, enabling text-to-video, image-to-video, frame interpolation, reference-guided generation, and video extension capabilities.
 
 ## Features
@@ -413,18 +418,37 @@ git clone https://github.com/jasongoecke/go-veo3.git
 cd go-veo3
 make build
 
+# Run all quality checks (lint, security, test)
+make check
+
 # Run tests
 make test
 
-# Run with coverage
-make coverage
+# Run with coverage (enforces 80% minimum)
+make test-coverage
 
 # Lint code
 make lint
 
+# Security scan
+make security
+
 # Clean build artifacts
 make clean
 ```
+
+### CI/CD Pipeline
+
+This project includes a comprehensive CI/CD pipeline with:
+- ✅ Automated linting with golangci-lint
+- ✅ Security scanning with gosec
+- ✅ Unit tests with 80% coverage requirement (enforced)
+- ✅ Multi-platform builds (Linux, macOS, Windows on amd64 and arm64)
+- ✅ Automated releases on git tags
+
+**See [docs/CI-CD-SETUP.md](docs/CI-CD-SETUP.md) for complete CI/CD documentation.**
+
+The build pipeline runs on every push and pull request, ensuring code quality before merge.
 
 ### Project Structure
 

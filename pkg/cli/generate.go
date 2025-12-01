@@ -94,7 +94,7 @@ Generation typically takes 2-5 minutes depending on parameters.`,
 	generateCmd.Flags().Bool("no-wait", false, "Start generation and return immediately")
 	generateCmd.Flags().Bool("no-download", false, "Skip automatic video download")
 	generateCmd.Flags().Bool("pretty", false, "Pretty-print JSON output (with --json)")
-	generateCmd.MarkFlagRequired("prompt")
+	_ = generateCmd.MarkFlagRequired("prompt")
 
 	// Flags for the text subcommand
 	generateTextCmd.Flags().StringP("prompt", "p", "", "Text prompt (required)")
@@ -109,20 +109,20 @@ Generation typically takes 2-5 minutes depending on parameters.`,
 	generateTextCmd.Flags().Bool("no-wait", false, "Start generation and return immediately")
 	generateTextCmd.Flags().Bool("no-download", false, "Skip automatic video download")
 	generateTextCmd.Flags().Bool("pretty", false, "Pretty-print JSON output (with --json)")
-	generateTextCmd.MarkFlagRequired("prompt")
+	_ = generateTextCmd.MarkFlagRequired("prompt")
 
 	// Bind flags to viper for config integration
-	viper.BindPFlag("model", generateCmd.Flags().Lookup("model"))
-	viper.BindPFlag("resolution", generateCmd.Flags().Lookup("resolution"))
-	viper.BindPFlag("duration", generateCmd.Flags().Lookup("duration"))
-	viper.BindPFlag("aspect-ratio", generateCmd.Flags().Lookup("aspect-ratio"))
-	viper.BindPFlag("output", generateCmd.Flags().Lookup("output"))
+	_ = viper.BindPFlag("model", generateCmd.Flags().Lookup("model"))
+	_ = viper.BindPFlag("resolution", generateCmd.Flags().Lookup("resolution"))
+	_ = viper.BindPFlag("duration", generateCmd.Flags().Lookup("duration"))
+	_ = viper.BindPFlag("aspect-ratio", generateCmd.Flags().Lookup("aspect-ratio"))
+	_ = viper.BindPFlag("output", generateCmd.Flags().Lookup("output"))
 
-	viper.BindPFlag("model", generateTextCmd.Flags().Lookup("model"))
-	viper.BindPFlag("resolution", generateTextCmd.Flags().Lookup("resolution"))
-	viper.BindPFlag("duration", generateTextCmd.Flags().Lookup("duration"))
-	viper.BindPFlag("aspect-ratio", generateTextCmd.Flags().Lookup("aspect-ratio"))
-	viper.BindPFlag("output", generateTextCmd.Flags().Lookup("output"))
+	_ = viper.BindPFlag("model", generateTextCmd.Flags().Lookup("model"))
+	_ = viper.BindPFlag("resolution", generateTextCmd.Flags().Lookup("resolution"))
+	_ = viper.BindPFlag("duration", generateTextCmd.Flags().Lookup("duration"))
+	_ = viper.BindPFlag("aspect-ratio", generateTextCmd.Flags().Lookup("aspect-ratio"))
+	_ = viper.BindPFlag("output", generateTextCmd.Flags().Lookup("output"))
 
 	return generateCmd
 }
@@ -274,7 +274,7 @@ func getIntWithDefault(cmd *cobra.Command, flag string, defaultValue int) int {
 	return value
 }
 
-func handleError(err error, jsonFormat bool, pretty bool) error {
+func handleError(err error, jsonFormat bool, _ bool) error {
 	if jsonFormat {
 		jsonOutput, _ := format.FormatErrorJSON("ERROR", err.Error(), nil)
 		fmt.Println(jsonOutput)
@@ -285,7 +285,7 @@ func handleError(err error, jsonFormat bool, pretty bool) error {
 	return err // Return the error for proper error handling in tests
 }
 
-func outputOperation(operation *veo3.Operation, jsonFormat bool, pretty bool) error {
+func outputOperation(operation *veo3.Operation, jsonFormat bool, _ bool) error {
 	if jsonFormat {
 		jsonOutput, err := format.FormatOperationJSON(operation)
 		if err != nil {
@@ -326,13 +326,13 @@ func pollOperation(ctx context.Context, client *veo3.Client, operationID string,
 			}
 
 			if !jsonFormat && bar != nil {
-				bar.Add(1)
+				_ = bar.Add(1)
 			}
 
 			switch operation.Status {
 			case veo3.StatusDone, veo3.StatusFailed, veo3.StatusCancelled:
 				if !jsonFormat && bar != nil {
-					bar.Finish()
+					_ = bar.Finish()
 				}
 				return operation, nil
 			}

@@ -98,7 +98,7 @@ func TestReferenceImageRequest_Validate(t *testing.T) {
 				},
 			},
 			wantErr: true,
-			errMsg:  "maximum 3 reference images allowed",
+			errMsg:  "too many reference images",
 		},
 		{
 			name: "non-8 second duration should fail",

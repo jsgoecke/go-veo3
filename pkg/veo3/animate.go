@@ -81,7 +81,7 @@ func EncodeImageToBase64(imagePath string) (string, error) {
 	}
 
 	// Read file contents
-	data, err := os.ReadFile(imagePath)
+	data, err := os.ReadFile(imagePath) // #nosec G304 -- User-specified image path is validated
 	if err != nil {
 		return "", fmt.Errorf("failed to read image file: %w", err)
 	}

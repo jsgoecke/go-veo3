@@ -29,6 +29,8 @@ go.work
 *.webp
 config.yaml
 coverage.out
+coverage.html
+security-report.txt
 dist/
 
 # Roo configuration (contains sensitive tokens)

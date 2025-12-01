@@ -181,9 +181,17 @@ default state. The API key is cleared and must be set again.`,
 func runConfigInit(cmd *cobra.Command, args []string) error {
 	force, _ := cmd.Flags().GetBool("force")
 	jsonFormat := viper.GetBool("json")
+	out := cmd.OutOrStdout()
+
+	// Get config file path from viper (respects --config flag)
+	configPath := viper.ConfigFileUsed()
+	if configPath == "" {
+		// If no config file specified, get it from root flag
+		configPath, _ = cmd.Flags().GetString("config")
+	}
 
 	// Check if config already exists
-	manager := config.NewManager("")
+	manager := config.NewManager(configPath)
 	if !force {
 		if _, err := manager.Load(); err == nil {
 			return fmt.Errorf("configuration already exists (use --force to overwrite)")
@@ -198,13 +206,13 @@ func runConfigInit(cmd *cobra.Command, args []string) error {
 
 	// Interactive prompts if values not provided and not in JSON mode
 	if !jsonFormat && apiKey == "" {
-		fmt.Print("Enter your Google Gemini API key: ")
-		fmt.Scanln(&apiKey)
+		_, _ = fmt.Fprint(out, "Enter your Google Gemini API key: ")
+		_, _ = fmt.Scanln(&apiKey)
 	}
 
 	if !jsonFormat && outputDir == "" {
-		fmt.Print("Enter default output directory (default: current directory): ")
-		fmt.Scanln(&outputDir)
+		_, _ = fmt.Fprint(out, "Enter default output directory (default: current directory): ")
+		_, _ = fmt.Scanln(&outputDir)
 		if outputDir == "" {
 			outputDir = "."
 		}
@@ -245,13 +253,13 @@ func runConfigInit(cmd *cobra.Command, args []string) error {
 			},
 		}
 		jsonOutput, _ := format.FormatGenericJSON(result)
-		fmt.Println(jsonOutput)
+		_, _ = fmt.Fprintln(out, jsonOutput)
 	} else {
-		fmt.Printf("✓ Configuration initialized successfully\n")
-		fmt.Printf("Config file: %s\n", manager.ConfigFile())
-		fmt.Printf("\nNext steps:\n")
-		fmt.Printf("1. Set your API key: veo3 config set api-key YOUR_API_KEY\n")
-		fmt.Printf("2. Generate your first video: veo3 generate --prompt 'A beautiful sunset'\n")
+		_, _ = fmt.Fprintf(out, "✓ Configuration initialized successfully\n")
+		_, _ = fmt.Fprintf(out, "Config file: %s\n", manager.ConfigFile())
+		_, _ = fmt.Fprintf(out, "\nNext steps:\n")
+		_, _ = fmt.Fprintf(out, "1. Set your API key: veo3 config set api-key YOUR_API_KEY\n")
+		_, _ = fmt.Fprintf(out, "2. Generate your first video: veo3 generate --prompt 'A beautiful sunset'\n")
 	}
 
 	return nil
@@ -261,9 +269,16 @@ func runConfigSet(cmd *cobra.Command, args []string) error {
 	key := args[0]
 	value := args[1]
 	jsonFormat := viper.GetBool("json")
+	out := cmd.OutOrStdout()
+
+	// Get config file path from viper (respects --config flag)
+	configPath := viper.ConfigFileUsed()
+	if configPath == "" {
+		configPath, _ = cmd.Root().PersistentFlags().GetString("config")
+	}
 
 	// Load existing configuration
-	manager := config.NewManager("")
+	manager := config.NewManager(configPath)
 	cfg, err := manager.Load()
 	if err != nil {
 		// Create new config if none exists
@@ -321,9 +336,9 @@ func runConfigSet(cmd *cobra.Command, args []string) error {
 			},
 		}
 		jsonOutput, _ := format.FormatGenericJSON(result)
-		fmt.Println(jsonOutput)
+		_, _ = fmt.Fprintln(out, jsonOutput)
 	} else {
-		fmt.Printf("✓ Configuration updated: %s\n", key)
+		_, _ = fmt.Fprintf(out, "✓ Configuration updated: %s\n", key)
 	}
 
 	return nil
@@ -332,9 +347,16 @@ func runConfigSet(cmd *cobra.Command, args []string) error {
 func runConfigGet(cmd *cobra.Command, args []string) error {
 	showSensitive, _ := cmd.Flags().GetBool("show-sensitive")
 	jsonFormat := viper.GetBool("json")
+	out := cmd.OutOrStdout()
+
+	// Get config file path from viper (respects --config flag)
+	configPath := viper.ConfigFileUsed()
+	if configPath == "" {
+		configPath, _ = cmd.Root().PersistentFlags().GetString("config")
+	}
 
 	// Load configuration
-	manager := config.NewManager("")
+	manager := config.NewManager(configPath)
 	cfg, err := manager.Load()
 	if err != nil {
 		return fmt.Errorf("no configuration found (run 'veo3 config init' first)")
@@ -379,9 +401,9 @@ func runConfigGet(cmd *cobra.Command, args []string) error {
 			},
 		}
 		jsonOutput, _ := format.FormatGenericJSON(result)
-		fmt.Println(jsonOutput)
+		_, _ = fmt.Fprintln(out, jsonOutput)
 	} else {
-		fmt.Printf("%s: %s\n", key, value)
+		_, _ = fmt.Fprintf(out, "%s: %s\n", key, value)
 	}
 
 	return nil
@@ -390,10 +412,17 @@ func runConfigGet(cmd *cobra.Command, args []string) error {
 func runConfigShow(cmd *cobra.Command, args []string) error {
 	showSensitive, _ := cmd.Flags().GetBool("show-sensitive")
 	jsonFormat := viper.GetBool("json")
+	out := cmd.OutOrStdout()
 	// pretty, _ := cmd.Flags().GetBool("pretty") // TODO: Use for formatted output
 
+	// Get config file path from viper (respects --config flag)
+	configPath := viper.ConfigFileUsed()
+	if configPath == "" {
+		configPath, _ = cmd.Root().PersistentFlags().GetString("config")
+	}
+
 	// Load configuration
-	manager := config.NewManager("")
+	manager := config.NewManager(configPath)
 	cfg, err := manager.Load()
 	if err != nil {
 		return fmt.Errorf("no configuration found (run 'veo3 config init' first)")
@@ -410,24 +439,24 @@ func runConfigShow(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println(jsonOutput)
+		_, _ = fmt.Fprintln(out, jsonOutput)
 	} else {
 		// Human-readable format
-		fmt.Printf("Configuration File: %s\n\n", manager.ConfigFile())
+		_, _ = fmt.Fprintf(out, "Configuration File: %s\n\n", manager.ConfigFile())
 
 		apiKey := cfg.APIKey
 		if !showSensitive && apiKey != "" {
 			apiKey = maskSensitiveValue(apiKey)
 		}
 
-		fmt.Printf("API Key: %s\n", apiKey)
-		fmt.Printf("Default Model: %s\n", cfg.DefaultModel)
-		fmt.Printf("Default Resolution: %s\n", cfg.DefaultResolution)
-		fmt.Printf("Default Duration: %ds\n", cfg.DefaultDuration)
-		fmt.Printf("Default Aspect Ratio: %s\n", cfg.DefaultAspectRatio)
-		fmt.Printf("Output Directory: %s\n", cfg.OutputDirectory)
-		fmt.Printf("Poll Interval: %ds\n", cfg.PollIntervalSeconds)
-		fmt.Printf("Config Version: %s\n", cfg.ConfigVersion)
+		_, _ = fmt.Fprintf(out, "API Key: %s\n", apiKey)
+		_, _ = fmt.Fprintf(out, "Default Model: %s\n", cfg.DefaultModel)
+		_, _ = fmt.Fprintf(out, "Default Resolution: %s\n", cfg.DefaultResolution)
+		_, _ = fmt.Fprintf(out, "Default Duration: %ds\n", cfg.DefaultDuration)
+		_, _ = fmt.Fprintf(out, "Default Aspect Ratio: %s\n", cfg.DefaultAspectRatio)
+		_, _ = fmt.Fprintf(out, "Output Directory: %s\n", cfg.OutputDirectory)
+		_, _ = fmt.Fprintf(out, "Poll Interval: %ds\n", cfg.PollIntervalSeconds)
+		_, _ = fmt.Fprintf(out, "Config Version: %s\n", cfg.ConfigVersion)
 	}
 
 	return nil
@@ -436,14 +465,21 @@ func runConfigShow(cmd *cobra.Command, args []string) error {
 func runConfigReset(cmd *cobra.Command, args []string) error {
 	force, _ := cmd.Flags().GetBool("force")
 	jsonFormat := viper.GetBool("json")
+	out := cmd.OutOrStdout()
+
+	// Get config file path from viper (respects --config flag)
+	configPath := viper.ConfigFileUsed()
+	if configPath == "" {
+		configPath, _ = cmd.Root().PersistentFlags().GetString("config")
+	}
 
 	// Confirmation prompt
 	if !force && !jsonFormat {
-		fmt.Print("Reset configuration to defaults? This will clear your API key. (y/N): ")
+		_, _ = fmt.Fprint(out, "Reset configuration to defaults? This will clear your API key. (y/N): ")
 		var response string
-		fmt.Scanln(&response)
+		_, _ = fmt.Scanln(&response)
 		if strings.ToLower(response) != "y" && strings.ToLower(response) != "yes" {
-			fmt.Println("Reset cancelled")
+			_, _ = fmt.Fprintln(out, "Reset cancelled")
 			return nil
 		}
 	}
@@ -461,7 +497,7 @@ func runConfigReset(cmd *cobra.Command, args []string) error {
 	}
 
 	// Save configuration
-	manager := config.NewManager("")
+	manager := config.NewManager(configPath)
 	err := manager.Save(cfg)
 	if err != nil {
 		return fmt.Errorf("failed to reset configuration: %w", err)
@@ -475,10 +511,10 @@ func runConfigReset(cmd *cobra.Command, args []string) error {
 			},
 		}
 		jsonOutput, _ := format.FormatGenericJSON(result)
-		fmt.Println(jsonOutput)
+		_, _ = fmt.Fprintln(out, jsonOutput)
 	} else {
-		fmt.Printf("✓ Configuration reset to defaults\n")
-		fmt.Printf("Remember to set your API key: veo3 config set api-key YOUR_API_KEY\n")
+		_, _ = fmt.Fprintf(out, "✓ Configuration reset to defaults\n")
+		_, _ = fmt.Fprintf(out, "Remember to set your API key: veo3 config set api-key YOUR_API_KEY\n")
 	}
 
 	return nil

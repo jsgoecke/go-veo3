@@ -52,11 +52,11 @@ Maximum image size: 20MB`,
 	animateCmd.Flags().Bool("pretty", false, "Pretty-print JSON output (with --json)")
 
 	// Bind flags to viper for config integration
-	viper.BindPFlag("model", animateCmd.Flags().Lookup("model"))
-	viper.BindPFlag("resolution", animateCmd.Flags().Lookup("resolution"))
-	viper.BindPFlag("duration", animateCmd.Flags().Lookup("duration"))
-	viper.BindPFlag("aspect-ratio", animateCmd.Flags().Lookup("aspect-ratio"))
-	viper.BindPFlag("output", animateCmd.Flags().Lookup("output"))
+	_ = viper.BindPFlag("model", animateCmd.Flags().Lookup("model"))
+	_ = viper.BindPFlag("resolution", animateCmd.Flags().Lookup("resolution"))
+	_ = viper.BindPFlag("duration", animateCmd.Flags().Lookup("duration"))
+	_ = viper.BindPFlag("aspect-ratio", animateCmd.Flags().Lookup("aspect-ratio"))
+	_ = viper.BindPFlag("output", animateCmd.Flags().Lookup("output"))
 
 	return animateCmd
 }

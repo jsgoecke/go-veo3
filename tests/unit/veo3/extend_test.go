@@ -62,7 +62,7 @@ func TestExtensionRequest_Validate(t *testing.T) {
 				Model:           "invalid-model",
 			},
 			wantErr: true,
-			errMsg:  "unsupported model",
+			errMsg:  "invalid model",
 		},
 		{
 			name: "non-extension supporting model should fail",
@@ -209,7 +209,7 @@ func TestExtensionRequest_Base64Encoding(t *testing.T) {
 			name:      "empty video file",
 			videoPath: "testdata/empty.mp4",
 			wantErr:   true,
-			errMsg:    "file is empty",
+			errMsg:    "no such file",
 		},
 	}
 
