@@ -29,22 +29,6 @@ type ModelConstraints struct {
 // ModelRegistry holds available models
 var ModelRegistry = []Model{
 	{
-		ID:   "veo-3.1",
-		Name: "Veo 3.1",
-		Capabilities: ModelCapabilities{
-			Audio:           true,
-			Extension:       true,
-			ReferenceImages: true,
-			Resolutions:     []string{"720p", "1080p"},
-			Durations:       []int{4, 6, 8},
-		},
-		Constraints: ModelConstraints{
-			MaxReferenceImages: 3,
-		},
-		Tier:    "standard",
-		Version: "3.1",
-	},
-	{
 		ID:   "veo-3.1-generate-preview",
 		Name: "Veo 3.1 Preview",
 		Capabilities: ModelCapabilities{
@@ -61,14 +45,46 @@ var ModelRegistry = []Model{
 		Version: "3.1",
 	},
 	{
-		ID:   "veo-3.0",
-		Name: "Veo 3.0",
+		ID:   "veo-3.1-fast-generate-preview",
+		Name: "Veo 3.1 Fast Preview",
 		Capabilities: ModelCapabilities{
-			Audio:           false,
+			Audio:           true,
+			Extension:       true,
+			ReferenceImages: true,
+			Resolutions:     []string{"720p", "1080p"},
+			Durations:       []int{4, 6, 8},
+		},
+		Constraints: ModelConstraints{
+			MaxReferenceImages: 3,
+		},
+		Tier:    "standard",
+		Version: "3.1",
+	},
+	{
+		ID:   "veo-3-generate-preview",
+		Name: "Veo 3.0 Preview",
+		Capabilities: ModelCapabilities{
+			Audio:           true,
 			Extension:       false,
 			ReferenceImages: false,
-			Resolutions:     []string{"720p"},
-			Durations:       []int{4, 6},
+			Resolutions:     []string{"720p", "1080p"},
+			Durations:       []int{4, 6, 8},
+		},
+		Constraints: ModelConstraints{
+			MaxReferenceImages: 0,
+		},
+		Tier:    "standard",
+		Version: "3.0",
+	},
+	{
+		ID:   "veo-3-fast-generate-preview",
+		Name: "Veo 3.0 Fast Preview",
+		Capabilities: ModelCapabilities{
+			Audio:           true,
+			Extension:       false,
+			ReferenceImages: false,
+			Resolutions:     []string{"720p", "1080p"},
+			Durations:       []int{4, 6, 8},
 		},
 		Constraints: ModelConstraints{
 			MaxReferenceImages: 0,
@@ -84,7 +100,7 @@ var ModelRegistry = []Model{
 			Extension:       false,
 			ReferenceImages: false,
 			Resolutions:     []string{"720p"},
-			Durations:       []int{4, 6},
+			Durations:       []int{5, 6, 8},
 		},
 		Constraints: ModelConstraints{
 			MaxReferenceImages: 0,
@@ -129,4 +145,68 @@ func ValidateModelForExtension(modelID string) error {
 		return fmt.Errorf("model %s does not support video extension", modelID)
 	}
 	return nil
+}
+
+// ValidateModelForResolution checks if model supports the specified resolution
+func ValidateModelForResolution(modelID string, resolution string) error {
+	model, exists := GetModel(modelID)
+	if !exists {
+		return fmt.Errorf("unknown model: %s", modelID)
+	}
+	for _, res := range model.Capabilities.Resolutions {
+		if res == resolution {
+			return nil
+		}
+	}
+	return fmt.Errorf("model %s does not support resolution %s (supported: %v)", modelID, resolution, model.Capabilities.Resolutions)
+}
+
+// ValidateModelForDuration checks if model supports the specified duration
+func ValidateModelForDuration(modelID string, duration int) error {
+	model, exists := GetModel(modelID)
+	if !exists {
+		return fmt.Errorf("unknown model: %s", modelID)
+	}
+	for _, dur := range model.Capabilities.Durations {
+		if dur == duration {
+			return nil
+		}
+	}
+	return fmt.Errorf("model %s does not support duration %ds (supported: %v)", modelID, duration, model.Capabilities.Durations)
+}
+
+// ListModels returns all available models
+func ListModels() []Model {
+	return ModelRegistry
+}
+
+// ListModelsByTier returns models filtered by tier
+func ListModelsByTier(tier string) []Model {
+	var models []Model
+	for _, m := range ModelRegistry {
+		if m.Tier == tier {
+			models = append(models, m)
+		}
+	}
+	return models
+}
+
+// ListModelsByCapability returns models that have a specific capability
+func ListModelsByCapability(capability string) []Model {
+	var models []Model
+	for _, m := range ModelRegistry {
+		hasCapability := false
+		switch capability {
+		case "audio":
+			hasCapability = m.Capabilities.Audio
+		case "extension":
+			hasCapability = m.Capabilities.Extension
+		case "reference_images":
+			hasCapability = m.Capabilities.ReferenceImages
+		}
+		if hasCapability {
+			models = append(models, m)
+		}
+	}
+	return models
 }

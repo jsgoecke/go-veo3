@@ -20,7 +20,7 @@ func TestImageRequest_Validate(t *testing.T) {
 			request: &veo3.ImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Animate this image",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 6,
@@ -34,7 +34,7 @@ func TestImageRequest_Validate(t *testing.T) {
 			request: &veo3.ImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Add motion to this image",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "1080p",
 					DurationSeconds: 8, // Required for 1080p
@@ -48,7 +48,7 @@ func TestImageRequest_Validate(t *testing.T) {
 			request: &veo3.ImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "", // Should be optional for image-to-video
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 6,
@@ -63,7 +63,7 @@ func TestImageRequest_Validate(t *testing.T) {
 			request: &veo3.ImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Animate this",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 6,
@@ -78,7 +78,7 @@ func TestImageRequest_Validate(t *testing.T) {
 			request: &veo3.ImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Animate this",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "720p",
 					DurationSeconds: 6,
@@ -93,7 +93,7 @@ func TestImageRequest_Validate(t *testing.T) {
 			request: &veo3.ImageRequest{
 				GenerationRequest: veo3.GenerationRequest{
 					Prompt:          "Animate this",
-					Model:           "veo-3.1",
+					Model:           "veo-3.1-generate-preview",
 					AspectRatio:     "16:9",
 					Resolution:      "1080p",
 					DurationSeconds: 6, // Should be 8 for 1080p
@@ -304,7 +304,7 @@ func TestImageRequest_APIPayloadStructure(t *testing.T) {
 	request := &veo3.ImageRequest{
 		GenerationRequest: veo3.GenerationRequest{
 			Prompt:          "Add motion to the water",
-			Model:           "veo-3.1",
+			Model:           "veo-3.1-generate-preview",
 			AspectRatio:     "16:9",
 			Resolution:      "720p",
 			DurationSeconds: 6,

@@ -27,7 +27,7 @@ func TestClient_GenerateVideo(t *testing.T) {
 			name: "successful generation request",
 			request: &veo3.GenerationRequest{
 				Prompt:          "A beautiful sunset over the ocean",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "720p",
 				DurationSeconds: 6,
@@ -47,7 +47,7 @@ func TestClient_GenerateVideo(t *testing.T) {
 			request: &veo3.GenerationRequest{
 				Prompt:          "A cityscape",
 				NegativePrompt:  "avoid people, cars",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "720p",
 				DurationSeconds: 6,
@@ -62,7 +62,7 @@ func TestClient_GenerateVideo(t *testing.T) {
 			name: "successful 1080p generation with 8s duration",
 			request: &veo3.GenerationRequest{
 				Prompt:          "High quality mountain landscape",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "1080p",
 				DurationSeconds: 8,
@@ -77,7 +77,7 @@ func TestClient_GenerateVideo(t *testing.T) {
 			name: "API returns bad request error",
 			request: &veo3.GenerationRequest{
 				Prompt:          "Test prompt",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "720p",
 				DurationSeconds: 6,
@@ -97,7 +97,7 @@ func TestClient_GenerateVideo(t *testing.T) {
 			name: "API returns authentication error",
 			request: &veo3.GenerationRequest{
 				Prompt:          "Test prompt",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "720p",
 				DurationSeconds: 6,
@@ -117,7 +117,7 @@ func TestClient_GenerateVideo(t *testing.T) {
 			name: "API returns rate limit error",
 			request: &veo3.GenerationRequest{
 				Prompt:          "Test prompt",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "720p",
 				DurationSeconds: 6,
@@ -137,7 +137,7 @@ func TestClient_GenerateVideo(t *testing.T) {
 			name: "API returns safety filter error",
 			request: &veo3.GenerationRequest{
 				Prompt:          "Inappropriate content prompt",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 				AspectRatio:     "16:9",
 				Resolution:      "720p",
 				DurationSeconds: 6,
@@ -417,7 +417,7 @@ func TestClient_ContextCancellation(t *testing.T) {
 
 	request := &veo3.GenerationRequest{
 		Prompt:          "Test context cancellation",
-		Model:           "veo-3.1",
+		Model:           "veo-3.1-generate-preview",
 		AspectRatio:     "16:9",
 		Resolution:      "720p",
 		DurationSeconds: 6,
@@ -463,7 +463,7 @@ func TestClient_RetryLogic(t *testing.T) {
 	ctx := context.Background()
 	request := &veo3.GenerationRequest{
 		Prompt:          "Test retry logic",
-		Model:           "veo-3.1",
+		Model:           "veo-3.1-generate-preview",
 		AspectRatio:     "16:9",
 		Resolution:      "720p",
 		DurationSeconds: 6,

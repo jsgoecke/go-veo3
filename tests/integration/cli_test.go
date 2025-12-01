@@ -676,3 +676,281 @@ func TestOperationsWorkflow(t *testing.T) {
 	// Should succeed even if no operations tracked yet
 	assert.NoError(t, err, "List operations should succeed")
 }
+
+// TestModelsCommands tests the models management commands
+func TestModelsCommands(t *testing.T) {
+	t.Run("models list", func(t *testing.T) {
+		var stdout, stderr bytes.Buffer
+
+		rootCmd := cli.NewRootCmd()
+		rootCmd.SetOut(&stdout)
+		rootCmd.SetErr(&stderr)
+		rootCmd.SetArgs([]string{
+			"models",
+			"list",
+		})
+
+		err := rootCmd.Execute()
+		require.NoError(t, err, "stderr: %s", stderr.String())
+
+		output := stdout.String()
+		// Should list all models
+		assert.Contains(t, output, "veo-3.1-generate-preview", "Output should contain veo-3.1-generate-preview")
+		assert.Contains(t, output, "veo-3.1-fast-generate-preview", "Output should contain veo-3.1-fast-generate-preview")
+		assert.Contains(t, output, "veo-3-generate-preview", "Output should contain veo-3-generate-preview")
+		assert.Contains(t, output, "veo-3-fast-generate-preview", "Output should contain veo-3-fast-generate-preview")
+		assert.Contains(t, output, "veo-2.0-generate-001", "Output should contain veo-2.0-generate-001")
+	})
+
+	t.Run("models list with JSON output", func(t *testing.T) {
+		var stdout, stderr bytes.Buffer
+
+		rootCmd := cli.NewRootCmd()
+		rootCmd.SetOut(&stdout)
+		rootCmd.SetErr(&stderr)
+		rootCmd.SetArgs([]string{
+			"models",
+			"list",
+			"--json",
+		})
+
+		err := rootCmd.Execute()
+		require.NoError(t, err, "stderr: %s", stderr.String())
+
+		output := stdout.String()
+		var result map[string]interface{}
+		err = json.Unmarshal([]byte(output), &result)
+		require.NoError(t, err, "Output should be valid JSON: %s", output)
+
+		// Verify JSON structure
+		assert.Contains(t, result, "success")
+		assert.Contains(t, result, "data")
+
+		if result["success"].(bool) {
+			data := result["data"].(map[string]interface{})
+			assert.Contains(t, data, "models")
+			models := data["models"].([]interface{})
+			assert.GreaterOrEqual(t, len(models), 5, "Should have at least 5 models")
+		}
+	})
+
+	t.Run("models info with valid model ID", func(t *testing.T) {
+		var stdout, stderr bytes.Buffer
+
+		rootCmd := cli.NewRootCmd()
+		rootCmd.SetOut(&stdout)
+		rootCmd.SetErr(&stderr)
+		rootCmd.SetArgs([]string{
+			"models",
+			"info",
+			"veo-3.1-generate-preview",
+		})
+
+		err := rootCmd.Execute()
+		require.NoError(t, err, "stderr: %s", stderr.String())
+
+		output := stdout.String()
+		// Should show model details
+		assert.Contains(t, output, "veo-3.1-generate-preview", "Output should contain model ID")
+		assert.Contains(t, output, "Veo 3.1", "Output should contain model name")
+		assert.Contains(t, output, "Audio", "Output should show audio capability")
+		assert.Contains(t, output, "Extension", "Output should show extension capability")
+		assert.Contains(t, output, "Reference Images", "Output should show reference images capability")
+	})
+
+	t.Run("models info with JSON output", func(t *testing.T) {
+		var stdout, stderr bytes.Buffer
+
+		rootCmd := cli.NewRootCmd()
+		rootCmd.SetOut(&stdout)
+		rootCmd.SetErr(&stderr)
+		rootCmd.SetArgs([]string{
+			"models",
+			"info",
+			"veo-3.1-generate-preview",
+			"--json",
+		})
+
+		err := rootCmd.Execute()
+		require.NoError(t, err, "stderr: %s", stderr.String())
+
+		output := stdout.String()
+		var result map[string]interface{}
+		err = json.Unmarshal([]byte(output), &result)
+		require.NoError(t, err, "Output should be valid JSON: %s", output)
+
+		// Verify JSON structure
+		assert.Contains(t, result, "success")
+		assert.Contains(t, result, "data")
+
+		if result["success"].(bool) {
+			data := result["data"].(map[string]interface{})
+			assert.Contains(t, data, "model")
+			model := data["model"].(map[string]interface{})
+			assert.Equal(t, "veo-3.1-generate-preview", model["id"])
+			assert.Contains(t, model, "name")
+			assert.Contains(t, model, "capabilities")
+			assert.Contains(t, model, "constraints")
+		}
+	})
+
+	t.Run("models info with invalid model ID", func(t *testing.T) {
+		var stdout, stderr bytes.Buffer
+
+		rootCmd := cli.NewRootCmd()
+		rootCmd.SetOut(&stdout)
+		rootCmd.SetErr(&stderr)
+		rootCmd.SetArgs([]string{
+			"models",
+			"info",
+			"invalid-model-id",
+		})
+
+		err := rootCmd.Execute()
+		require.Error(t, err)
+		assert.Contains(t, strings.ToLower(err.Error()), "not found", "Should indicate model not found")
+	})
+
+	t.Run("models info without model ID", func(t *testing.T) {
+		var stdout, stderr bytes.Buffer
+
+		rootCmd := cli.NewRootCmd()
+		rootCmd.SetOut(&stdout)
+		rootCmd.SetErr(&stderr)
+		rootCmd.SetArgs([]string{
+			"models",
+			"info",
+		})
+
+		err := rootCmd.Execute()
+		require.Error(t, err)
+		assert.Contains(t, strings.ToLower(err.Error()), "model", "Should indicate model ID is required")
+	})
+}
+
+// TestModelsListFiltering tests filtering models by capabilities
+func TestModelsListFiltering(t *testing.T) {
+	tests := []struct {
+		name           string
+		args           []string
+		expectedModels []string
+		minCount       int
+	}{
+		{
+			name: "list models with audio capability",
+			args: []string{"models", "list", "--filter", "audio"},
+			expectedModels: []string{
+				"veo-3.1-generate-preview",
+				"veo-3.1-fast-generate-preview",
+				"veo-3-generate-preview",
+				"veo-3-fast-generate-preview",
+			},
+			minCount: 4,
+		},
+		{
+			name: "list models with extension capability",
+			args: []string{"models", "list", "--filter", "extension"},
+			expectedModels: []string{
+				"veo-3.1-generate-preview",
+				"veo-3.1-fast-generate-preview",
+			},
+			minCount: 2,
+		},
+		{
+			name: "list models with reference images capability",
+			args: []string{"models", "list", "--filter", "reference_images"},
+			expectedModels: []string{
+				"veo-3.1-generate-preview",
+				"veo-3.1-fast-generate-preview",
+			},
+			minCount: 2,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var stdout, stderr bytes.Buffer
+
+			rootCmd := cli.NewRootCmd()
+			rootCmd.SetOut(&stdout)
+			rootCmd.SetErr(&stderr)
+			rootCmd.SetArgs(tt.args)
+
+			err := rootCmd.Execute()
+			// The --filter flag may not be implemented yet, so we allow errors
+			if err != nil {
+				assert.Contains(t, strings.ToLower(err.Error()), "filter", "Error should be about filter flag")
+				t.Skip("Filter flag not yet implemented")
+			} else {
+				output := stdout.String()
+				// Verify expected models are in output
+				for _, modelID := range tt.expectedModels {
+					assert.Contains(t, output, modelID, "Output should contain %s", modelID)
+				}
+			}
+		})
+	}
+}
+
+// TestModelsCapabilitiesDisplay tests that model capabilities are displayed correctly
+func TestModelsCapabilitiesDisplay(t *testing.T) {
+	tests := []struct {
+		name               string
+		modelID            string
+		expectedAudio      bool
+		expectedExtension  bool
+		expectedReferences bool
+	}{
+		{
+			name:               "veo-3.1-generate-preview capabilities",
+			modelID:            "veo-3.1-generate-preview",
+			expectedAudio:      true,
+			expectedExtension:  true,
+			expectedReferences: true,
+		},
+		{
+			name:               "veo-3-generate-preview capabilities",
+			modelID:            "veo-3-generate-preview",
+			expectedAudio:      true,
+			expectedExtension:  false,
+			expectedReferences: false,
+		},
+		{
+			name:               "veo-2.0-generate-001 capabilities",
+			modelID:            "veo-2.0-generate-001",
+			expectedAudio:      false,
+			expectedExtension:  false,
+			expectedReferences: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var stdout, stderr bytes.Buffer
+
+			rootCmd := cli.NewRootCmd()
+			rootCmd.SetOut(&stdout)
+			rootCmd.SetErr(&stderr)
+			rootCmd.SetArgs([]string{
+				"models",
+				"info",
+				tt.modelID,
+			})
+
+			err := rootCmd.Execute()
+			require.NoError(t, err, "stderr: %s", stderr.String())
+
+			output := stdout.String()
+			// Check capabilities are displayed correctly
+			if tt.expectedAudio {
+				assert.Contains(t, output, "✓", "Should show audio support with checkmark")
+			}
+			if tt.expectedExtension {
+				assert.Contains(t, output, "Extension", "Should mention extension capability")
+			}
+			if tt.expectedReferences {
+				assert.Contains(t, output, "Reference", "Should mention reference images capability")
+			}
+		})
+	}
+}

@@ -21,7 +21,7 @@ func TestExtensionRequest_Validate(t *testing.T) {
 			request: &veo3.ExtensionRequest{
 				VideoPath:       "testdata/video.mp4",
 				ExtensionPrompt: "Continue the scene with more action",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 			},
 			wantErr: false,
 		},
@@ -30,7 +30,7 @@ func TestExtensionRequest_Validate(t *testing.T) {
 			request: &veo3.ExtensionRequest{
 				VideoPath:       "testdata/video.mp4",
 				ExtensionPrompt: "", // Should be optional
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 			},
 			wantErr: false,
 		},
@@ -39,7 +39,7 @@ func TestExtensionRequest_Validate(t *testing.T) {
 			request: &veo3.ExtensionRequest{
 				VideoPath:       "",
 				ExtensionPrompt: "Continue the scene",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 			},
 			wantErr: true,
 			errMsg:  "video path cannot be empty",
@@ -79,7 +79,7 @@ func TestExtensionRequest_Validate(t *testing.T) {
 			request: &veo3.ExtensionRequest{
 				VideoPath:       "testdata/nonexistent.mp4",
 				ExtensionPrompt: "Continue the scene",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 			},
 			wantErr: true,
 			errMsg:  "no such file",
@@ -89,7 +89,7 @@ func TestExtensionRequest_Validate(t *testing.T) {
 			request: &veo3.ExtensionRequest{
 				VideoPath:       "testdata/video.avi",
 				ExtensionPrompt: "Continue the scene",
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 			},
 			wantErr: true,
 			errMsg:  "unsupported video format",
@@ -99,7 +99,7 @@ func TestExtensionRequest_Validate(t *testing.T) {
 			request: &veo3.ExtensionRequest{
 				VideoPath:       "testdata/video.mp4",
 				ExtensionPrompt: generateLongPrompt(1025), // Over 1024 token limit
-				Model:           "veo-3.1",
+				Model:           "veo-3.1-generate-preview",
 			},
 			wantErr: true,
 			errMsg:  "exceeds 1024 tokens",
@@ -246,7 +246,7 @@ func TestExtensionRequest_ModelSupport(t *testing.T) {
 	}{
 		{
 			name:    "veo-3.1 supports extension",
-			model:   "veo-3.1",
+			model:   "veo-3.1-generate-preview",
 			wantErr: false,
 		},
 		{
@@ -256,7 +256,7 @@ func TestExtensionRequest_ModelSupport(t *testing.T) {
 		},
 		{
 			name:    "veo-3.0 does not support extension",
-			model:   "veo-3.0",
+			model:   "veo-3-generate-preview",
 			wantErr: true,
 			errMsg:  "does not support video extension",
 		},
@@ -286,7 +286,7 @@ func TestExtensionRequest_APIPayload(t *testing.T) {
 	request := &veo3.ExtensionRequest{
 		VideoPath:       "testdata/video.mp4",
 		ExtensionPrompt: "Continue with dramatic action",
-		Model:           "veo-3.1",
+		Model:           "veo-3.1-generate-preview",
 	}
 
 	// Test API payload building
