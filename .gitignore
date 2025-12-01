@@ -22,6 +22,17 @@ go.work
 
 # Project specific
 /veo3
+
+# Allow test fixtures
+!tests/**/testdata/*.mp4
+!tests/**/testdata/*.png
+!tests/**/testdata/*.jpg
+!tests/**/testdata/*.jpeg
+!tests/**/testdata/*.webp
+!tests/**/testdata/*.avi
+!tests/**/testdata/*.gif
+
+# Ignore media files elsewhere
 *.mp4
 *.png
 *.jpg
