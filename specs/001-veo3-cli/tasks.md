@@ -236,12 +236,12 @@
 
 ### Implementation for User Story 7
 
-- [ ] T086 [US7] Enhance pkg/veo3/models.go with complete model registry from spec.md
-- [ ] T087 [US7] Implement model capabilities and constraints checks in pkg/veo3/models.go
-- [ ] T088 [P] [US7] Create pkg/cli/models.go with cobra command group for 'models'
-- [ ] T089 [P] [US7] Implement 'models list' subcommand with formatted table output in pkg/cli/models.go
-- [ ] T090 [P] [US7] Implement 'models info <model>' subcommand with detailed specs in pkg/cli/models.go
-- [ ] T091 [US7] Add default model configuration support in pkg/config/config.go
+- [x] T086 [US7] Enhance pkg/veo3/models.go with complete model registry from spec.md
+- [x] T087 [US7] Implement model capabilities and constraints checks in pkg/veo3/models.go
+- [x] T088 [P] [US7] Create pkg/cli/models.go with cobra command group for 'models'
+- [x] T089 [P] [US7] Implement 'models list' subcommand with formatted table output in pkg/cli/models.go
+- [x] T090 [P] [US7] Implement 'models info <model>' subcommand with detailed specs in pkg/cli/models.go
+- [x] T091 [US7] Add default model configuration support in pkg/config/config.go
 
 **Checkpoint**: Model discovery and selection fully functional
 
