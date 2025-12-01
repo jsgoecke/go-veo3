@@ -41,6 +41,10 @@ jobs:
   security:
     name: Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -59,10 +63,11 @@ jobs:
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v2
         # Skip when running locally with act (no GitHub token available)
+        # Continue on error to not block pipeline
         if: always() && !env.ACT
+        continue-on-error: true
         with:
           sarif_file: gosec.sarif
-          token: ${{ secrets.GITHUB_TOKEN }}
 
   test:
     name: Unit Tests
