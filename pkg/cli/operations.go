@@ -14,16 +14,18 @@ import (
 	"github.com/spf13/viper"
 )
 
-// operationsCmd represents the operations command group
-var operationsCmd = &cobra.Command{
-	Use:   "operations",
-	Short: "Manage long-running video generation operations",
-	Long: `Manage long-running video generation operations.
+// newOperationsCmd creates the operations command group
+func newOperationsCmd() *cobra.Command {
+	// Create fresh command instance to avoid flag redefinition in tests
+	operationsCmd := &cobra.Command{
+		Use:   "operations",
+		Short: "Manage long-running video generation operations",
+		Long: `Manage long-running video generation operations.
 
 This command group provides tools to list, check status, download, and cancel
 video generation operations. This is useful for managing multiple concurrent
 generations or recovering from interrupted sessions.`,
-	Example: `  # List all operations
+		Example: `  # List all operations
   veo3 operations list
 
   # Check status of specific operation
@@ -34,10 +36,8 @@ generations or recovering from interrupted sessions.`,
 
   # Cancel running operation
   veo3 operations cancel operations/abc123`,
-}
+	}
 
-// newOperationsCmd creates the operations command group
-func newOperationsCmd() *cobra.Command {
 	// Add subcommands
 	operationsCmd.AddCommand(newOperationsListCmd())
 	operationsCmd.AddCommand(newOperationsStatusCmd())

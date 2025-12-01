@@ -17,17 +17,19 @@ import (
 	"github.com/spf13/viper"
 )
 
-// generateCmd represents the generate command
-var generateCmd = &cobra.Command{
-	Use:   "generate",
-	Short: "Generate videos from text prompts",
-	Long: `Generate videos from text descriptions using Google Veo 3.1.
+// newGenerateCmd creates the generate command with all subcommands
+func newGenerateCmd() *cobra.Command {
+	// Create fresh command instances each time to avoid flag redefinition in tests
+	generateCmd := &cobra.Command{
+		Use:   "generate",
+		Short: "Generate videos from text prompts",
+		Long: `Generate videos from text descriptions using Google Veo 3.1.
 
 This command creates a video generation request and polls until completion.
 The generated video is automatically downloaded to the current directory.
 
 Generation typically takes 2-5 minutes depending on parameters.`,
-	Example: `  # Generate 720p video with default settings
+		Example: `  # Generate 720p video with default settings
   veo3 generate --prompt "A serene sunset over ocean waves"
 
   # Generate 1080p 8-second video (1080p requires 8s duration)
@@ -44,26 +46,25 @@ Generation typically takes 2-5 minutes depending on parameters.`,
 
   # Start generation but don't wait (async mode)
   veo3 generate -p "Time-lapse clouds" --no-wait`,
-	RunE: runGenerate,
-}
+		RunE: runGenerate,
+	}
 
-// generateTextCmd represents the text-to-video generation subcommand
-var generateTextCmd = &cobra.Command{
-	Use:   "text",
-	Short: "Generate video from text prompt",
-	Long: `Generate a video from a text description using Google Veo 3.1.
+	generateTextCmd := &cobra.Command{
+		Use:   "text",
+		Short: "Generate video from text prompt",
+		Long: `Generate a video from a text description using Google Veo 3.1.
 
 This command creates a video generation request and polls until completion.
 The generated video is automatically downloaded to the current directory.
 
 Generation typically takes 2-5 minutes depending on parameters.`,
-	Example: `  # Generate 720p video with default settings
+		Example: `  # Generate 720p video with default settings
   veo3 generate text --prompt "A serene sunset over ocean waves"
 
   # Generate 1080p 8-second video (1080p requires 8s duration)
   veo3 generate text -p "City skyline at night" -r 1080p -d 8
 
-  # Generate vertical video (9:16 aspect ratio)  
+  # Generate vertical video (9:16 aspect ratio)
   veo3 generate text -p "Portrait of a cat" -a 9:16
 
   # Save to specific directory
@@ -74,11 +75,9 @@ Generation typically takes 2-5 minutes depending on parameters.`,
 
   # Start generation but don't wait (async mode)
   veo3 generate text -p "Time-lapse clouds" --no-wait`,
-	RunE: runGenerateText,
-}
+		RunE: runGenerateText,
+	}
 
-// newGenerateCmd creates the generate command with all subcommands
-func newGenerateCmd() *cobra.Command {
 	// Add text subcommand to generate
 	generateCmd.AddCommand(generateTextCmd)
 

@@ -10,11 +10,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-// interpolateCmd represents the interpolate command
-var interpolateCmd = &cobra.Command{
-	Use:   "interpolate [first-frame] [last-frame]",
-	Short: "Generate video by interpolating between two frames",
-	Long: `Generate a video by smoothly transitioning between two input images.
+// newInterpolateCmd creates the interpolate command
+func newInterpolateCmd() *cobra.Command {
+	// Create fresh command instance to avoid flag redefinition in tests
+	interpolateCmd := &cobra.Command{
+		Use:   "interpolate [first-frame] [last-frame]",
+		Short: "Generate video by interpolating between two frames",
+		Long: `Generate a video by smoothly transitioning between two input images.
 
 This command takes two images as the first and last frames and creates
 a smooth interpolation between them. The interpolation is constrained
@@ -23,7 +25,7 @@ to 8 seconds duration and 16:9 aspect ratio as per API requirements.
 Supported image formats: JPEG, PNG, WebP
 Maximum image size: 20MB each
 Images must have identical dimensions.`,
-	Example: `  # Interpolate between two frames
+		Example: `  # Interpolate between two frames
   veo3 interpolate start.jpg end.jpg
 
   # Add a prompt to guide the transition
@@ -34,12 +36,10 @@ Images must have identical dimensions.`,
 
   # Save to specific directory
   veo3 interpolate frame1.jpg frame2.jpg --output ./videos/`,
-	Args: cobra.ExactArgs(2),
-	RunE: runInterpolate,
-}
+		Args: cobra.ExactArgs(2),
+		RunE: runInterpolate,
+	}
 
-// newInterpolateCmd creates the interpolate command
-func newInterpolateCmd() *cobra.Command {
 	// Add flags (note: duration and aspect-ratio are fixed for interpolation)
 	interpolateCmd.Flags().StringP("prompt", "p", "", "Optional prompt to guide the transition")
 	interpolateCmd.Flags().StringP("resolution", "r", "", "Resolution (720p or 1080p)")

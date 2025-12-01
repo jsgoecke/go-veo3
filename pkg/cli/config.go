@@ -11,17 +11,19 @@ import (
 	"github.com/spf13/viper"
 )
 
-// configCmd represents the config command group
-var configCmd = &cobra.Command{
-	Use:   "config",
-	Short: "Manage CLI configuration and preferences",
-	Long: `Manage CLI configuration including API credentials, defaults, and preferences.
+// newConfigCmd creates the config command group
+func newConfigCmd() *cobra.Command {
+	// Create fresh command instance to avoid flag redefinition in tests
+	configCmd := &cobra.Command{
+		Use:   "config",
+		Short: "Manage CLI configuration and preferences",
+		Long: `Manage CLI configuration including API credentials, defaults, and preferences.
 
 Configuration is stored in YAML format with secure file permissions.
 The config file location follows XDG Base Directory specification:
 - Linux/macOS: ~/.config/veo3/config.yaml
 - Windows: %APPDATA%\veo3\config.yaml`,
-	Example: `  # Initialize configuration interactively
+		Example: `  # Initialize configuration interactively
   veo3 config init
 
   # Set API key
@@ -32,10 +34,8 @@ The config file location follows XDG Base Directory specification:
 
   # Reset configuration to defaults
   veo3 config reset`,
-}
+	}
 
-// newConfigCmd creates the config command group
-func newConfigCmd() *cobra.Command {
 	// Add subcommands
 	configCmd.AddCommand(newConfigInitCmd())
 	configCmd.AddCommand(newConfigSetCmd())
