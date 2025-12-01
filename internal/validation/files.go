@@ -66,12 +66,15 @@ func ValidateImageFormat(filename string) error {
 	case ".jpg", ".jpeg", ".png", ".webp":
 		return nil
 	default:
-		return fmt.Errorf("unsupported image extension: %s", ext)
+		return fmt.Errorf("unsupported image format: %s", ext)
 	}
 }
 
 // ValidateImageSize checks if file size is within limits
 func ValidateImageSize(size int64) error {
+	if size == 0 {
+		return fmt.Errorf("image file is empty")
+	}
 	if size > MaxImageSize {
 		return fmt.Errorf("image file too large: %d bytes (max %d bytes)", size, MaxImageSize)
 	}
