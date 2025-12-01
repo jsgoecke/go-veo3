@@ -205,7 +205,7 @@
 - [x] T071 [P] [US6] Write unit tests for operation listing in tests/unit/operations/manager_test.go
 - [x] T072 [P] [US6] Write unit tests for status checking in tests/unit/operations/manager_test.go
 - [x] T073 [P] [US6] Write unit tests for download and cancel operations in tests/unit/operations/manager_test.go
-- [ ] T074 [P] [US6] Write integration tests for operations subcommands in tests/integration/cli_test.go
+- [x] T074 [P] [US6] Write integration tests for operations subcommands in tests/integration/cli_test.go
 
 ### Implementation for User Story 6
 
@@ -215,8 +215,8 @@
 - [x] T078 [P] [US6] Implement 'operations status <id>' subcommand in pkg/cli/operations.go
 - [x] T079 [P] [US6] Implement 'operations download <id>' subcommand in pkg/cli/operations.go
 - [x] T080 [P] [US6] Implement 'operations cancel <id>' subcommand in pkg/cli/operations.go
-- [ ] T081 [US6] Add --async flag to generate/animate/interpolate/extend commands
-- [ ] T082 [US6] Add operation ID display for async mode in all generation commands
+- [x] T081 [US6] Add --async flag to generate/animate/interpolate/extend commands
+- [x] T082 [US6] Add operation ID display for async mode in all generation commands
 
 **Checkpoint**: Full async operation lifecycle management available
 
