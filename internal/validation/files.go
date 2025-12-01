@@ -66,12 +66,18 @@ func ValidateImageFormat(filename string) error {
 	case ".jpg", ".jpeg", ".png", ".webp":
 		return nil
 	default:
-		return fmt.Errorf("unsupported image extension: %s", ext)
+		return fmt.Errorf("unsupported image format: %s", ext)
 	}
 }
 
 // ValidateImageSize checks if file size is within limits
 func ValidateImageSize(size int64) error {
+	if size < 0 {
+		return fmt.Errorf("invalid file size: %d bytes", size)
+	}
+	if size == 0 {
+		return fmt.Errorf("image file is empty")
+	}
 	if size > MaxImageSize {
 		return fmt.Errorf("image file too large: %d bytes (max %d bytes)", size, MaxImageSize)
 	}
@@ -104,6 +110,9 @@ func ValidateInterpolationImages(path1, path2 string) error {
 
 // ValidateCompatibleDimensions checks if dimensions match
 func ValidateCompatibleDimensions(w1, h1, w2, h2 int) error {
+	if w1 <= 0 || h1 <= 0 || w2 <= 0 || h2 <= 0 {
+		return fmt.Errorf("invalid dimensions: %dx%d vs %dx%d", w1, h1, w2, h2)
+	}
 	if w1 != w2 || h1 != h2 {
 		return fmt.Errorf("image dimensions mismatch: %dx%d vs %dx%d", w1, h1, w2, h2)
 	}
@@ -116,13 +125,17 @@ func ValidateVideoFileForExtension(path string) error {
 	if err != nil {
 		return err
 	}
-	// Basic check?
+	// Basic check
 	if info.IsDir() {
 		return fmt.Errorf("path is a directory")
 	}
-	// Maybe check extension?
+	// Check for empty file
+	if info.Size() == 0 {
+		return fmt.Errorf("video file is empty")
+	}
+	// Check extension
 	ext := strings.ToLower(filepath.Ext(path))
-	if ext != ".mp4" && ext != ".mov" { // Assuming Veo supports these
+	if ext != ".mp4" && ext != ".mov" {
 		return fmt.Errorf("unsupported video format: %s", ext)
 	}
 	return nil

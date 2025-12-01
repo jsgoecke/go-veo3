@@ -167,13 +167,26 @@ func runGenerateText(cmd *cobra.Command, args []string) error {
 	// Create context
 	ctx := context.Background()
 
-	// Create API client
+	// Create API client - check multiple sources in priority order
 	apiKey := viper.GetString("api-key")
 	if apiKey == "" {
-		apiKey = cfg.APIKey
+		// Check environment variables directly (viper's flag binding can override env vars)
+		if envKey := os.Getenv("VEO3_API_KEY"); envKey != "" {
+			apiKey = envKey
+		} else if envKey := os.Getenv("GEMINI_API_KEY"); envKey != "" {
+			apiKey = envKey
+		} else {
+			apiKey = cfg.APIKey
+		}
 	}
 
-	client, err := veo3.NewClient(context.Background(), apiKey)
+	// Check for custom API endpoint (for testing)
+	opts := []veo3.ClientOption{}
+	if apiEndpoint := os.Getenv("VEO3_API_ENDPOINT"); apiEndpoint != "" {
+		opts = append(opts, veo3.WithBaseURL(apiEndpoint))
+	}
+
+	client, err := veo3.NewClient(context.Background(), apiKey, opts...)
 	if err != nil {
 		return handleError(err, jsonFormat, pretty)
 	}
@@ -265,12 +278,11 @@ func handleError(err error, jsonFormat bool, pretty bool) error {
 	if jsonFormat {
 		jsonOutput, _ := format.FormatErrorJSON("ERROR", err.Error(), nil)
 		fmt.Println(jsonOutput)
-		return nil // Don't return error since we handled it
+	} else {
+		// Human-readable error formatting
+		fmt.Fprintf(os.Stderr, "❌ Error: %s\n", err.Error())
 	}
-
-	// Human-readable error formatting
-	fmt.Fprintf(os.Stderr, "❌ Error: %s\n", err.Error())
-	return nil // Don't return error since we handled it
+	return err // Return the error for proper error handling in tests
 }
 
 func outputOperation(operation *veo3.Operation, jsonFormat bool, pretty bool) error {

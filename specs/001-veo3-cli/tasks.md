@@ -79,15 +79,15 @@
 
 ### Implementation for User Story 1
 
-- [ ] T025 [P] [US1] Create pkg/veo3/generate.go with GenerateVideo function and GenerationRequest struct
-- [ ] T026 [P] [US1] Implement request validation in pkg/veo3/generate.go (prompt length, parameters)
-- [ ] T027 [US1] Integrate Google API client call in pkg/veo3/generate.go (depends on T025, T026)
-- [ ] T028 [P] [US1] Create pkg/cli/generate.go with cobra command for 'generate' subcommand
-- [ ] T029 [US1] Wire up command flags (--model, --resolution, --duration, --aspect-ratio, --negative-prompt, --output)
-- [ ] T030 [US1] Add progress display using progressbar library in pkg/cli/generate.go
-- [ ] T031 [US1] Add operation polling and video download on completion in pkg/cli/generate.go
-- [ ] T032 [US1] Add error handling with actionable messages in pkg/cli/generate.go
-- [ ] T033 [US1] Add --json flag support for machine-readable output in pkg/cli/generate.go
+- [x] T025 [P] [US1] Create pkg/veo3/generate.go with GenerateVideo function and GenerationRequest struct
+- [x] T026 [P] [US1] Implement request validation in pkg/veo3/generate.go (prompt length, parameters)
+- [x] T027 [US1] Integrate Google API client call in pkg/veo3/generate.go (depends on T025, T026)
+- [x] T028 [P] [US1] Create pkg/cli/generate.go with cobra command for 'generate' subcommand
+- [x] T029 [US1] Wire up command flags (--model, --resolution, --duration, --aspect-ratio, --negative-prompt, --output)
+- [x] T030 [US1] Add progress display using progressbar library in pkg/cli/generate.go
+- [x] T031 [US1] Add operation polling and video download on completion in pkg/cli/generate.go
+- [x] T032 [US1] Add error handling with actionable messages in pkg/cli/generate.go
+- [x] T033 [US1] Add --json flag support for machine-readable output in pkg/cli/generate.go
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -205,7 +205,7 @@
 - [x] T071 [P] [US6] Write unit tests for operation listing in tests/unit/operations/manager_test.go
 - [x] T072 [P] [US6] Write unit tests for status checking in tests/unit/operations/manager_test.go
 - [x] T073 [P] [US6] Write unit tests for download and cancel operations in tests/unit/operations/manager_test.go
-- [ ] T074 [P] [US6] Write integration tests for operations subcommands in tests/integration/cli_test.go
+- [x] T074 [P] [US6] Write integration tests for operations subcommands in tests/integration/cli_test.go
 
 ### Implementation for User Story 6
 
@@ -215,8 +215,8 @@
 - [x] T078 [P] [US6] Implement 'operations status <id>' subcommand in pkg/cli/operations.go
 - [x] T079 [P] [US6] Implement 'operations download <id>' subcommand in pkg/cli/operations.go
 - [x] T080 [P] [US6] Implement 'operations cancel <id>' subcommand in pkg/cli/operations.go
-- [ ] T081 [US6] Add --async flag to generate/animate/interpolate/extend commands
-- [ ] T082 [US6] Add operation ID display for async mode in all generation commands
+- [x] T081 [US6] Add --async flag to generate/animate/interpolate/extend commands
+- [x] T082 [US6] Add operation ID display for async mode in all generation commands
 
 **Checkpoint**: Full async operation lifecycle management available
 
