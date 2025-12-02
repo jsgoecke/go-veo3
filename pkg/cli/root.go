@@ -47,6 +47,7 @@ extend existing videos, use reference images, and perform frame interpolation fr
 	cmd.AddCommand(newModelsCmd())
 	cmd.AddCommand(newConfigCmd())
 	cmd.AddCommand(newBatchCmd())
+	cmd.AddCommand(newTemplatesCmd())
 
 	return cmd
 }
