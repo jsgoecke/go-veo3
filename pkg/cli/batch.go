@@ -13,13 +13,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	batchConcurrency   int
-	batchContinueOnErr bool
-	batchOutputDir     string
-	batchResultsFile   string
-)
-
 // newBatchCmd creates the batch command group
 func newBatchCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -240,11 +233,11 @@ func runBatchTemplate(cmd *cobra.Command, args []string) error {
 }
 
 // runBatchRetry retries failed jobs from a results file
-func runBatchRetry(cmd *cobra.Command, args []string, outputDir string, concurrency int) error {
+func runBatchRetry(_ *cobra.Command, args []string, _ string, _ int) error {
 	resultsFile := args[0]
 
 	// Load previous results
-	data, err := os.ReadFile(resultsFile)
+	data, err := os.ReadFile(resultsFile) // #nosec G304 -- resultsFile is user-provided CLI argument
 	if err != nil {
 		return fmt.Errorf("failed to read results file: %w", err)
 	}
@@ -349,7 +342,7 @@ func saveResults(filename string, summary batch.BatchSummary) error {
 		return err
 	}
 
-	return os.WriteFile(filename, data, 0644)
+	return os.WriteFile(filename, data, 0600)
 }
 
 // createVeo3Client creates a Veo3 API client (placeholder)

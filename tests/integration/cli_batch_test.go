@@ -36,7 +36,7 @@ concurrency: 2
 continue_on_error: true
 `
 	manifestPath := filepath.Join(tmpDir, "manifest.yaml")
-	err := os.WriteFile(manifestPath, []byte(manifestContent), 0644)
+	err := os.WriteFile(manifestPath, []byte(manifestContent), 0600)
 	require.NoError(t, err)
 
 	// Test batch process command (with mock API)

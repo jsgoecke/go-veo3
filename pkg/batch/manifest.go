@@ -44,7 +44,7 @@ func ParseManifest(data []byte) (*BatchManifest, error) {
 
 // ParseManifestFile parses a YAML manifest from a file
 func ParseManifestFile(path string) (*BatchManifest, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) // #nosec G304 -- path is user-provided CLI argument
 	if err != nil {
 		return nil, fmt.Errorf("failed to read manifest file: %w", err)
 	}
