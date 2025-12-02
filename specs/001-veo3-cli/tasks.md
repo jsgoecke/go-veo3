@@ -284,22 +284,22 @@
 
 ### Tests for User Story 9 (MANDATORY) ⚠️
 
-- [ ] T105 [P] [US9] Write unit tests for manifest parsing in tests/unit/batch/manifest_test.go
-- [ ] T106 [P] [US9] Write unit tests for batch processor in tests/unit/batch/processor_test.go
-- [ ] T107 [P] [US9] Write integration tests for batch commands in tests/integration/cli_test.go
+- [x] T105 [P] [US9] Write unit tests for manifest parsing in tests/unit/batch/manifest_test.go
+- [x] T106 [P] [US9] Write unit tests for batch processor in tests/unit/batch/processor_test.go
+- [x] T107 [P] [US9] Write integration tests for batch commands in tests/integration/cli_test.go
 
 ### Implementation for User Story 9
 
-- [ ] T108 [P] [US9] Create pkg/batch/manifest.go with YAML manifest parsing and BatchManifest struct
-- [ ] T109 [US9] Implement job validation and type routing in pkg/batch/manifest.go
-- [ ] T110 [P] [US9] Create pkg/batch/processor.go with concurrent job execution (worker pool pattern)
-- [ ] T111 [US9] Implement progress tracking across all jobs in pkg/batch/processor.go
-- [ ] T112 [US9] Implement summary report generation in pkg/batch/processor.go
-- [ ] T113 [P] [US9] Create pkg/cli/batch.go with cobra command group for 'batch'
-- [ ] T114 [P] [US9] Implement 'batch process <manifest>' subcommand in pkg/cli/batch.go
-- [ ] T115 [P] [US9] Implement 'batch template' to generate sample manifest in pkg/cli/batch.go
-- [ ] T116 [P] [US9] Implement 'batch retry <results.json>' for failed jobs in pkg/cli/batch.go
-- [ ] T117 [US9] Add --concurrency flag for parallel job control in pkg/cli/batch.go
+- [x] T108 [P] [US9] Create pkg/batch/manifest.go with YAML manifest parsing and BatchManifest struct
+- [x] T109 [US9] Implement job validation and type routing in pkg/batch/manifest.go
+- [x] T110 [P] [US9] Create pkg/batch/processor.go with concurrent job execution (worker pool pattern)
+- [x] T111 [US9] Implement progress tracking across all jobs in pkg/batch/processor.go
+- [x] T112 [US9] Implement summary report generation in pkg/batch/processor.go
+- [x] T113 [P] [US9] Create pkg/cli/batch.go with cobra command group for 'batch'
+- [x] T114 [P] [US9] Implement 'batch process <manifest>' subcommand in pkg/cli/batch.go
+- [x] T115 [P] [US9] Implement 'batch template' to generate sample manifest in pkg/cli/batch.go
+- [x] T116 [P] [US9] Implement 'batch retry <results.json>' for failed jobs in pkg/cli/batch.go
+- [x] T117 [US9] Add --concurrency flag for parallel job control in pkg/cli/batch.go
 
 **Checkpoint**: Bulk generation automation ready for production workflows
 
