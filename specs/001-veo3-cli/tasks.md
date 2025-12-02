@@ -313,20 +313,20 @@
 
 ### Tests for User Story 10 (MANDATORY) ⚠️
 
-- [ ] T118 [P] [US10] Write unit tests for template parsing in tests/unit/templates/parser_test.go
-- [ ] T119 [P] [US10] Write unit tests for variable substitution in tests/unit/templates/parser_test.go
-- [ ] T120 [P] [US10] Write integration tests for templates commands in tests/integration/cli_test.go
+- [x] T118 [P] [US10] Write unit tests for template parsing in tests/unit/templates/parser_test.go
+- [x] T119 [P] [US10] Write unit tests for variable substitution in tests/unit/templates/parser_test.go
+- [x] T120 [P] [US10] Write integration tests for templates commands in tests/integration/cli_test.go
 
 ### Implementation for User Story 10
 
-- [ ] T121 [P] [US10] Create pkg/templates/manager.go with template storage and retrieval (YAML file)
-- [ ] T122 [P] [US10] Create pkg/templates/parser.go with Mustache-style {{variable}} substitution
-- [ ] T123 [US10] Implement variable extraction from template strings in pkg/templates/parser.go
-- [ ] T124 [P] [US10] Create pkg/cli/templates.go with cobra command group for 'templates'
-- [ ] T125 [P] [US10] Implement 'templates save <name> --prompt <template>' in pkg/cli/templates.go
-- [ ] T126 [P] [US10] Implement 'templates list' subcommand in pkg/cli/templates.go
-- [ ] T127 [P] [US10] Implement 'templates export/import' for sharing in pkg/cli/templates.go
-- [ ] T128 [US10] Add --template flag to generate command with --var support in pkg/cli/generate.go
+- [x] T121 [P] [US10] Create pkg/templates/manager.go with template storage and retrieval (YAML file)
+- [x] T122 [P] [US10] Create pkg/templates/parser.go with Mustache-style {{variable}} substitution
+- [x] T123 [US10] Implement variable extraction from template strings in pkg/templates/parser.go
+- [x] T124 [P] [US10] Create pkg/cli/templates.go with cobra command group for 'templates'
+- [x] T125 [P] [US10] Implement 'templates save <name> --prompt <template>' in pkg/cli/templates.go
+- [x] T126 [P] [US10] Implement 'templates list' subcommand in pkg/cli/templates.go
+- [x] T127 [P] [US10] Implement 'templates export/import' for sharing in pkg/cli/templates.go
+- [x] T128 [US10] Add --template flag to generate command with --var support in pkg/cli/generate.go
 
 **Checkpoint**: All user stories complete - full feature set implemented
 
