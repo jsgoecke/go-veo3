@@ -284,22 +284,22 @@
 
 ### Tests for User Story 9 (MANDATORY) ⚠️
 
-- [ ] T105 [P] [US9] Write unit tests for manifest parsing in tests/unit/batch/manifest_test.go
-- [ ] T106 [P] [US9] Write unit tests for batch processor in tests/unit/batch/processor_test.go
-- [ ] T107 [P] [US9] Write integration tests for batch commands in tests/integration/cli_test.go
+- [x] T105 [P] [US9] Write unit tests for manifest parsing in tests/unit/batch/manifest_test.go
+- [x] T106 [P] [US9] Write unit tests for batch processor in tests/unit/batch/processor_test.go
+- [x] T107 [P] [US9] Write integration tests for batch commands in tests/integration/cli_test.go
 
 ### Implementation for User Story 9
 
-- [ ] T108 [P] [US9] Create pkg/batch/manifest.go with YAML manifest parsing and BatchManifest struct
-- [ ] T109 [US9] Implement job validation and type routing in pkg/batch/manifest.go
-- [ ] T110 [P] [US9] Create pkg/batch/processor.go with concurrent job execution (worker pool pattern)
-- [ ] T111 [US9] Implement progress tracking across all jobs in pkg/batch/processor.go
-- [ ] T112 [US9] Implement summary report generation in pkg/batch/processor.go
-- [ ] T113 [P] [US9] Create pkg/cli/batch.go with cobra command group for 'batch'
-- [ ] T114 [P] [US9] Implement 'batch process <manifest>' subcommand in pkg/cli/batch.go
-- [ ] T115 [P] [US9] Implement 'batch template' to generate sample manifest in pkg/cli/batch.go
-- [ ] T116 [P] [US9] Implement 'batch retry <results.json>' for failed jobs in pkg/cli/batch.go
-- [ ] T117 [US9] Add --concurrency flag for parallel job control in pkg/cli/batch.go
+- [x] T108 [P] [US9] Create pkg/batch/manifest.go with YAML manifest parsing and BatchManifest struct
+- [x] T109 [US9] Implement job validation and type routing in pkg/batch/manifest.go
+- [x] T110 [P] [US9] Create pkg/batch/processor.go with concurrent job execution (worker pool pattern)
+- [x] T111 [US9] Implement progress tracking across all jobs in pkg/batch/processor.go
+- [x] T112 [US9] Implement summary report generation in pkg/batch/processor.go
+- [x] T113 [P] [US9] Create pkg/cli/batch.go with cobra command group for 'batch'
+- [x] T114 [P] [US9] Implement 'batch process <manifest>' subcommand in pkg/cli/batch.go
+- [x] T115 [P] [US9] Implement 'batch template' to generate sample manifest in pkg/cli/batch.go
+- [x] T116 [P] [US9] Implement 'batch retry <results.json>' for failed jobs in pkg/cli/batch.go
+- [x] T117 [US9] Add --concurrency flag for parallel job control in pkg/cli/batch.go
 
 **Checkpoint**: Bulk generation automation ready for production workflows
 
@@ -313,20 +313,20 @@
 
 ### Tests for User Story 10 (MANDATORY) ⚠️
 
-- [ ] T118 [P] [US10] Write unit tests for template parsing in tests/unit/templates/parser_test.go
-- [ ] T119 [P] [US10] Write unit tests for variable substitution in tests/unit/templates/parser_test.go
-- [ ] T120 [P] [US10] Write integration tests for templates commands in tests/integration/cli_test.go
+- [x] T118 [P] [US10] Write unit tests for template parsing in tests/unit/templates/parser_test.go
+- [x] T119 [P] [US10] Write unit tests for variable substitution in tests/unit/templates/parser_test.go
+- [x] T120 [P] [US10] Write integration tests for templates commands in tests/integration/cli_test.go
 
 ### Implementation for User Story 10
 
-- [ ] T121 [P] [US10] Create pkg/templates/manager.go with template storage and retrieval (YAML file)
-- [ ] T122 [P] [US10] Create pkg/templates/parser.go with Mustache-style {{variable}} substitution
-- [ ] T123 [US10] Implement variable extraction from template strings in pkg/templates/parser.go
-- [ ] T124 [P] [US10] Create pkg/cli/templates.go with cobra command group for 'templates'
-- [ ] T125 [P] [US10] Implement 'templates save <name> --prompt <template>' in pkg/cli/templates.go
-- [ ] T126 [P] [US10] Implement 'templates list' subcommand in pkg/cli/templates.go
-- [ ] T127 [P] [US10] Implement 'templates export/import' for sharing in pkg/cli/templates.go
-- [ ] T128 [US10] Add --template flag to generate command with --var support in pkg/cli/generate.go
+- [x] T121 [P] [US10] Create pkg/templates/manager.go with template storage and retrieval (YAML file)
+- [x] T122 [P] [US10] Create pkg/templates/parser.go with Mustache-style {{variable}} substitution
+- [x] T123 [US10] Implement variable extraction from template strings in pkg/templates/parser.go
+- [x] T124 [P] [US10] Create pkg/cli/templates.go with cobra command group for 'templates'
+- [x] T125 [P] [US10] Implement 'templates save <name> --prompt <template>' in pkg/cli/templates.go
+- [x] T126 [P] [US10] Implement 'templates list' subcommand in pkg/cli/templates.go
+- [x] T127 [P] [US10] Implement 'templates export/import' for sharing in pkg/cli/templates.go
+- [x] T128 [US10] Add --template flag to generate command with --var support in pkg/cli/generate.go
 
 **Checkpoint**: All user stories complete - full feature set implemented
 
@@ -337,17 +337,17 @@
 **Purpose**: Improvements that affect multiple user stories
 
 - [x] T129 [P] Create comprehensive README.md with examples and troubleshooting
-- [ ] T130 [P] Generate man pages from Cobra documentation
-- [ ] T131 [P] Add shell completion generation (bash, zsh, fish)
-- [ ] T132 [P] Add --version command with build info (version, commit, build date)
-- [ ] T133 [P] Implement structured logging with --verbose flag across all commands
-- [ ] T134 Code cleanup and consistent error messages across all commands
-- [ ] T135 Performance profiling and optimization for large batch jobs
-- [ ] T136 [P] Security audit (API key handling, file permissions, input validation)
-- [ ] T137 Add quickstart.md validation by running examples from it
+- [x] T130 [P] Generate man pages from Cobra documentation
+- [x] T131 [P] Add shell completion generation (bash, zsh, fish)
+- [x] T132 [P] Add --version command with build info (version, commit, build date)
+- [x] T133 [P] Implement structured logging with --verbose flag across all commands
+- [x] T134 Code cleanup and consistent error messages across all commands
+- [x] T135 Performance profiling and optimization for large batch jobs
+- [x] T136 [P] Security audit (API key handling, file permissions, input validation)
+- [x] T137 Add quickstart.md validation by running examples from it
 - [x] T138 [P] Create CONTRIBUTING.md with development setup instructions
 - [x] T139 [P] Create LICENSE file (MIT)
-- [ ] T140 Final coverage report and ensure 80% threshold is met
+- [x] T140 Final coverage report and ensure 80% threshold is met
 
 ---
 

@@ -82,7 +82,9 @@ Generation typically takes 2-5 minutes depending on parameters.`,
 	generateCmd.AddCommand(generateTextCmd)
 
 	// Flags for the main generate command (backwards compatibility)
-	generateCmd.Flags().StringP("prompt", "p", "", "Text prompt (required)")
+	generateCmd.Flags().StringP("prompt", "p", "", "Text prompt (required unless --template is used)")
+	generateCmd.Flags().StringP("template", "t", "", "Use a saved template by name")
+	generateCmd.Flags().StringToString("vars", map[string]string{}, "Template variables (key=value format)")
 	generateCmd.Flags().StringP("resolution", "r", "", "Resolution (720p or 1080p)")
 	generateCmd.Flags().IntP("duration", "d", 0, "Duration in seconds (4, 6, or 8)")
 	generateCmd.Flags().StringP("aspect-ratio", "a", "", "Aspect ratio (16:9 or 9:16)")
@@ -94,10 +96,11 @@ Generation typically takes 2-5 minutes depending on parameters.`,
 	generateCmd.Flags().Bool("no-wait", false, "Start generation and return immediately")
 	generateCmd.Flags().Bool("no-download", false, "Skip automatic video download")
 	generateCmd.Flags().Bool("pretty", false, "Pretty-print JSON output (with --json)")
-	_ = generateCmd.MarkFlagRequired("prompt")
 
 	// Flags for the text subcommand
-	generateTextCmd.Flags().StringP("prompt", "p", "", "Text prompt (required)")
+	generateTextCmd.Flags().StringP("prompt", "p", "", "Text prompt (required unless --template is used)")
+	generateTextCmd.Flags().StringP("template", "t", "", "Use a saved template by name")
+	generateTextCmd.Flags().StringToString("vars", map[string]string{}, "Template variables (key=value format)")
 	generateTextCmd.Flags().StringP("resolution", "r", "", "Resolution (720p or 1080p)")
 	generateTextCmd.Flags().IntP("duration", "d", 0, "Duration in seconds (4, 6, or 8)")
 	generateTextCmd.Flags().StringP("aspect-ratio", "a", "", "Aspect ratio (16:9 or 9:16)")
@@ -109,7 +112,6 @@ Generation typically takes 2-5 minutes depending on parameters.`,
 	generateTextCmd.Flags().Bool("no-wait", false, "Start generation and return immediately")
 	generateTextCmd.Flags().Bool("no-download", false, "Skip automatic video download")
 	generateTextCmd.Flags().Bool("pretty", false, "Pretty-print JSON output (with --json)")
-	_ = generateTextCmd.MarkFlagRequired("prompt")
 
 	// Bind flags to viper for config integration
 	_ = viper.BindPFlag("model", generateCmd.Flags().Lookup("model"))
@@ -149,8 +151,50 @@ func runGenerateText(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Get flag values with config fallbacks
+	// Get template and variables
+	templateName, _ := cmd.Flags().GetString("template")
+	templateVars, _ := cmd.Flags().GetStringToString("vars")
+
+	// Get prompt - either directly or from template
 	prompt, _ := cmd.Flags().GetString("prompt")
+
+	// If template is specified, load and render it
+	if templateName != "" {
+		manager, err := getTemplateManager()
+		if err != nil {
+			return handleError(fmt.Errorf("failed to get template manager: %w", err), viper.GetBool("json"), false)
+		}
+
+		template, err := manager.Get(templateName)
+		if err != nil {
+			return handleError(fmt.Errorf("failed to load template: %w", err), viper.GetBool("json"), false)
+		}
+
+		renderedPrompt, err := template.Render(templateVars)
+		if err != nil {
+			return handleError(fmt.Errorf("failed to render template: %w", err), viper.GetBool("json"), false)
+		}
+
+		prompt = renderedPrompt
+
+		if !viper.GetBool("json") {
+			fmt.Printf("📝 Using template '%s'\n", templateName)
+			if len(templateVars) > 0 {
+				fmt.Println("   Variables:")
+				for k, v := range templateVars {
+					fmt.Printf("     %s: %s\n", k, v)
+				}
+			}
+			fmt.Printf("   Rendered: %s\n\n", prompt)
+		}
+	}
+
+	// Validate that we have a prompt (either direct or from template)
+	if prompt == "" {
+		return handleError(fmt.Errorf("either --prompt or --template must be specified"), viper.GetBool("json"), false)
+	}
+
+	// Get flag values with config fallbacks
 	resolution := getStringWithDefault(cmd, "resolution", cfg.DefaultResolution)
 	duration := getIntWithDefault(cmd, "duration", cfg.DefaultDuration)
 	aspectRatio := getStringWithDefault(cmd, "aspect-ratio", cfg.DefaultAspectRatio)
