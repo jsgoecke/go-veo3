@@ -15,8 +15,11 @@ A command-line interface for Google's Veo 3.1 video generation API, enabling tex
 - **Reference-Guided Generation**: Guide video generation with up to 3 reference images for style and content consistency
 - **Video Extension**: Extend existing Veo-generated videos by up to 7 seconds (chainable)
 - **Operation Management**: List, monitor, download, and cancel long-running video generation operations
-- **Batch Processing**: Process multiple video generation requests from YAML manifests
+- **Batch Processing**: Process multiple video generation requests from YAML manifests with concurrent execution
+- **Prompt Templates**: Save and reuse prompt templates with variable substitution for consistent generations
 - **Configuration Management**: Store API credentials and default settings
+- **Documentation Generation**: Generate man pages and markdown documentation for all commands
+- **Structured Logging**: Debug output with `--verbose` flag for troubleshooting
 - **Multiple Output Formats**: Human-readable and JSON output for automation
 
 ## Installation
@@ -244,6 +247,51 @@ veo3 batch template > my-manifest.yaml
 veo3 batch retry results.json
 ```
 
+### Prompt Templates
+
+```bash
+# Save a template with variables
+veo3 templates save product-demo "{{product}} rotating on {{surface}} with {{lighting}}"
+
+# List all templates
+veo3 templates list
+
+# View template details
+veo3 templates get product-demo
+
+# Generate using template
+veo3 generate --template product-demo \
+  --vars product="smartphone" \
+  --vars surface="marble" \
+  --vars lighting="soft studio lighting"
+
+# Export templates for sharing
+veo3 templates export my-templates.yaml
+
+# Import templates
+veo3 templates import shared-templates.yaml
+
+# Delete a template
+veo3 templates delete product-demo
+```
+
+### Documentation & Shell Completion
+
+```bash
+# Generate man pages
+veo3 docs man --output ./docs/man
+
+# Generate markdown documentation
+veo3 docs markdown --output ./docs/cli
+
+# Generate shell completion
+veo3 completion bash > /etc/bash_completion.d/veo3
+veo3 completion zsh > ~/.zsh/completion/_veo3
+
+# Use completion in current session
+source <(veo3 completion bash)
+```
+
 ### Model Information
 
 ```bash
@@ -360,6 +408,36 @@ Batch processing for multiple generations
 - `process <manifest.yaml>`: Process batch manifest
 - `template`: Generate sample manifest
 - `retry <results.json>`: Retry failed jobs
+
+**Flags:**
+- `--concurrency, -c`: Number of concurrent jobs (default: 3)
+
+#### `veo3 templates`
+Manage prompt templates with variable substitution
+
+**Subcommands:**
+- `save <name>`: Save a new template
+- `list`: List all saved templates
+- `get <name>`: View template details
+- `delete <name>`: Remove a template
+- `export <file>`: Export templates to YAML
+- `import <file>`: Import templates from YAML
+
+**Template Variables:**
+Use `{{variable}}` syntax in prompts for substitution
+
+#### `veo3 docs`
+Generate documentation
+
+**Subcommands:**
+- `man`: Generate man pages
+- `markdown`: Generate markdown documentation
+
+#### `veo3 completion`
+Generate shell completion scripts
+
+**Arguments:**
+- Shell type: `bash`, `zsh`, `fish`, or `powershell`
 
 ## Output Formats
 
@@ -567,11 +645,31 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Uses [Cobra](https://github.com/spf13/cobra) for CLI framework
 - Uses [Viper](https://github.com/spf13/viper) for configuration management
 
+## Documentation
+
+### Available Guides
+
+- **[SECURITY.md](docs/SECURITY.md)** - Security audit report and best practices
+- **[PERFORMANCE.md](docs/PERFORMANCE.md)** - Performance profiling and optimization guide
+- **[QUICKSTART-VALIDATION.md](docs/QUICKSTART-VALIDATION.md)** - Quickstart guide validation status
+- **[CI-CD-SETUP.md](docs/CI-CD-SETUP.md)** - CI/CD pipeline setup and usage
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contributing guidelines
+
+### Generate Documentation
+
+```bash
+# Generate man pages for offline reference
+veo3 docs man --output ./man
+
+# Generate markdown command reference
+veo3 docs markdown --output ./docs
+```
+
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/jasongoecke/go-veo3/issues)
-- **Documentation**: [GitHub Wiki](https://github.com/jasongoecke/go-veo3/wiki)
 - **API Docs**: [Google Gemini API Documentation](https://ai.google.dev/api/docs)
+- **Security**: Report vulnerabilities privately (do not open public issues)
 
 ## Roadmap
 
