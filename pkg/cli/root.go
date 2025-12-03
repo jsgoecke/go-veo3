@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jasongoecke/go-veo3/internal/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -62,7 +63,7 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initConfig, initLogger)
 }
 
 func initConfig() {
@@ -84,4 +85,17 @@ func initConfig() {
 	viper.SetEnvPrefix("VEO3")
 
 	_ = viper.ReadInConfig() // Config file is optional, ignore errors
+}
+
+func initLogger() {
+	verbose := viper.GetBool("verbose")
+	quiet := viper.GetBool("quiet")
+	logger.Init(verbose, quiet)
+
+	if verbose {
+		logger.Debug("Verbose logging enabled")
+		if cfgFile := viper.ConfigFileUsed(); cfgFile != "" {
+			logger.Debug("Using config file: %s", cfgFile)
+		}
+	}
 }
