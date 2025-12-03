@@ -58,6 +58,10 @@ func (p *Processor) ProcessManifest(ctx context.Context, manifest *BatchManifest
 		concurrency = p.Concurrency
 	}
 
+	// Create cancellable context for stopping on error
+	workerCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	// Create channels for job distribution and result collection
 	jobChan := make(chan BatchJob, len(manifest.Jobs))
 	resultChan := make(chan JobResult, len(manifest.Jobs))
@@ -75,7 +79,7 @@ func (p *Processor) ProcessManifest(ctx context.Context, manifest *BatchManifest
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			p.worker(ctx, jobChan, resultChan, errorChan, manifest.ContinueOnError)
+			p.worker(workerCtx, jobChan, resultChan, errorChan, manifest.ContinueOnError)
 		}()
 	}
 
@@ -107,7 +111,8 @@ func (p *Processor) ProcessManifest(ctx context.Context, manifest *BatchManifest
 				firstError = err
 				if !manifest.ContinueOnError {
 					// Cancel context to stop other workers
-					return results, firstError
+					cancel()
+					// Continue collecting results from workers that already started
 				}
 			}
 
