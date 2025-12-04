@@ -386,6 +386,16 @@ func pollOperation(ctx context.Context, client *veo3.Client, operationID string,
 
 func downloadVideo(ctx context.Context, operation *veo3.Operation, outputDir string, filename string, jsonFormat bool) error {
 	if operation.VideoURI == "" {
+		// Provide detailed error message with debugging hints
+		if operation.Status == veo3.StatusDone {
+			return fmt.Errorf("no video URI in completed operation\n\n"+
+				"The operation completed successfully but the video URI was not extracted from the API response.\n"+
+				"This could be due to an unexpected API response format.\n\n"+
+				"To debug this issue:\n"+
+				"1. Set VEO3_DEBUG=1 environment variable to see the raw API response\n"+
+				"2. Check if the operation actually generated a video: veo3 operations get %s\n"+
+				"3. Review the API response format in the debug logs", operation.ID)
+		}
 		return fmt.Errorf("no video URI in completed operation")
 	}
 

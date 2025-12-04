@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -107,12 +109,17 @@ func (c *Client) GetOperation(ctx context.Context, operationID string) (*Operati
 		return nil, fmt.Errorf("failed to read response: %w", err)
 	}
 
+	// Debug logging if VEO3_DEBUG environment variable is set
+	if os.Getenv("VEO3_DEBUG") != "" {
+		log.Printf("[DEBUG] GetOperation response body: %s", string(body))
+	}
+
 	// Handle HTTP errors
 	if resp.StatusCode != http.StatusOK {
 		return nil, parseErrorResponse(resp.StatusCode, body)
 	}
 
-	// Parse response
+	// Parse response with flexible structure to handle various API response formats
 	var apiResp struct {
 		Name     string `json:"name"`
 		Done     bool   `json:"done"`
@@ -123,11 +130,17 @@ func (c *Client) GetOperation(ctx context.Context, operationID string) (*Operati
 		} `json:"metadata"`
 		Response *struct {
 			Type     string `json:"@type"`
-			VideoURI string `json:"videoUri"` // Single video URI format
+			VideoURI string `json:"videoUri"`  // Format: videoUri (camelCase)
+			VideoUri string `json:"video_uri"` // Format: video_uri (snake_case)
 			Videos   []struct {
 				URI      string `json:"uri"`
+				Uri      string `json:"Uri"` // Capitalized variant
 				MimeType string `json:"mimeType"`
 			} `json:"videos"` // Array format
+			Video *struct {
+				URI      string `json:"uri"`
+				MimeType string `json:"mimeType"`
+			} `json:"video"` // Single video object format
 		} `json:"response,omitempty"`
 		Error *struct {
 			Code    int                      `json:"code"`
@@ -140,6 +153,10 @@ func (c *Client) GetOperation(ctx context.Context, operationID string) (*Operati
 	if err := json.Unmarshal(body, &apiResp); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
+
+	// Also parse as a generic map for fallback extraction
+	var genericResp map[string]interface{}
+	_ = json.Unmarshal(body, &genericResp)
 
 	// Map API response to Operation
 	op := &Operation{
@@ -172,11 +189,17 @@ func (c *Client) GetOperation(ctx context.Context, operationID string) (*Operati
 			// Successful operation
 			op.Status = StatusDone
 
-			// Extract video URI - support both formats
-			if apiResp.Response.VideoURI != "" {
-				op.VideoURI = apiResp.Response.VideoURI
-			} else if len(apiResp.Response.Videos) > 0 {
-				op.VideoURI = apiResp.Response.Videos[0].URI
+			// Extract video URI - support multiple response formats
+			videoURI := extractVideoURI(apiResp.Response, genericResp)
+
+			if videoURI != "" {
+				op.VideoURI = videoURI
+			} else if os.Getenv("VEO3_DEBUG") != "" {
+				// Log response structure for debugging when URI extraction fails
+				log.Printf("[DEBUG] Failed to extract video URI from response. Response structure: %+v", apiResp.Response)
+				if resp, ok := genericResp["response"].(map[string]interface{}); ok {
+					log.Printf("[DEBUG] Generic response map: %+v", resp)
+				}
 			}
 
 			now := time.Now()
@@ -324,6 +347,93 @@ func parseErrorResponse(statusCode int, body []byte) error {
 			"http_code": statusCode,
 		},
 	}
+}
+
+// extractVideoURI attempts to extract video URI from various response formats
+func extractVideoURI(response *struct {
+	Type     string `json:"@type"`
+	VideoURI string `json:"videoUri"`
+	VideoUri string `json:"video_uri"`
+	Videos   []struct {
+		URI      string `json:"uri"`
+		Uri      string `json:"Uri"`
+		MimeType string `json:"mimeType"`
+	} `json:"videos"`
+	Video *struct {
+		URI      string `json:"uri"`
+		MimeType string `json:"mimeType"`
+	} `json:"video"`
+}, genericResp map[string]interface{}) string {
+	// Try structured formats first
+
+	// Format 1: Direct videoUri field (camelCase)
+	if response.VideoURI != "" {
+		return response.VideoURI
+	}
+
+	// Format 2: Direct video_uri field (snake_case)
+	if response.VideoUri != "" {
+		return response.VideoUri
+	}
+
+	// Format 3: videos array with uri field
+	if len(response.Videos) > 0 {
+		if response.Videos[0].URI != "" {
+			return response.Videos[0].URI
+		}
+		// Try capitalized variant
+		if response.Videos[0].Uri != "" {
+			return response.Videos[0].Uri
+		}
+	}
+
+	// Format 4: Single video object
+	if response.Video != nil && response.Video.URI != "" {
+		return response.Video.URI
+	}
+
+	// Fallback: Try extracting from generic map for unknown formats
+	if genericResp != nil {
+		if resp, ok := genericResp["response"].(map[string]interface{}); ok {
+			// Try various field name patterns
+			if uri, ok := resp["videoUri"].(string); ok && uri != "" {
+				return uri
+			}
+			if uri, ok := resp["video_uri"].(string); ok && uri != "" {
+				return uri
+			}
+			if uri, ok := resp["VideoUri"].(string); ok && uri != "" {
+				return uri
+			}
+			if uri, ok := resp["VideoURI"].(string); ok && uri != "" {
+				return uri
+			}
+			if uri, ok := resp["uri"].(string); ok && uri != "" {
+				return uri
+			}
+
+			// Try videos array
+			if videos, ok := resp["videos"].([]interface{}); ok && len(videos) > 0 {
+				if video, ok := videos[0].(map[string]interface{}); ok {
+					if uri, ok := video["uri"].(string); ok && uri != "" {
+						return uri
+					}
+					if uri, ok := video["Uri"].(string); ok && uri != "" {
+						return uri
+					}
+				}
+			}
+
+			// Try single video object
+			if video, ok := resp["video"].(map[string]interface{}); ok {
+				if uri, ok := video["uri"].(string); ok && uri != "" {
+					return uri
+				}
+			}
+		}
+	}
+
+	return ""
 }
 
 // generateID generates a random ID for operations
