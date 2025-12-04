@@ -365,7 +365,35 @@ func extractVideoURI(response *struct {
 	} `json:"video"`
 }, genericResp map[string]interface{}) string {
 	// Try structured formats first
+	if uri := extractFromStructured(response); uri != "" {
+		return uri
+	}
 
+	// Fallback: Try extracting from generic map for unknown formats
+	if genericResp != nil {
+		if resp, ok := genericResp["response"].(map[string]interface{}); ok {
+			return extractFromGenericMap(resp)
+		}
+	}
+
+	return ""
+}
+
+// extractFromStructured extracts URI from structured response formats
+func extractFromStructured(response *struct {
+	Type     string `json:"@type"`
+	VideoURI string `json:"videoUri"`
+	VideoUri string `json:"video_uri"`
+	Videos   []struct {
+		URI      string `json:"uri"`
+		Uri      string `json:"Uri"`
+		MimeType string `json:"mimeType"`
+	} `json:"videos"`
+	Video *struct {
+		URI      string `json:"uri"`
+		MimeType string `json:"mimeType"`
+	} `json:"video"`
+}) string {
 	// Format 1: Direct videoUri field (camelCase)
 	if response.VideoURI != "" {
 		return response.VideoURI
@@ -381,7 +409,6 @@ func extractVideoURI(response *struct {
 		if response.Videos[0].URI != "" {
 			return response.Videos[0].URI
 		}
-		// Try capitalized variant
 		if response.Videos[0].Uri != "" {
 			return response.Videos[0].Uri
 		}
@@ -392,45 +419,105 @@ func extractVideoURI(response *struct {
 		return response.Video.URI
 	}
 
-	// Fallback: Try extracting from generic map for unknown formats
-	if genericResp != nil {
-		if resp, ok := genericResp["response"].(map[string]interface{}); ok {
-			// Try various field name patterns
-			if uri, ok := resp["videoUri"].(string); ok && uri != "" {
-				return uri
-			}
-			if uri, ok := resp["video_uri"].(string); ok && uri != "" {
-				return uri
-			}
-			if uri, ok := resp["VideoUri"].(string); ok && uri != "" {
-				return uri
-			}
-			if uri, ok := resp["VideoURI"].(string); ok && uri != "" {
-				return uri
-			}
-			if uri, ok := resp["uri"].(string); ok && uri != "" {
-				return uri
-			}
+	return ""
+}
 
-			// Try videos array
-			if videos, ok := resp["videos"].([]interface{}); ok && len(videos) > 0 {
-				if video, ok := videos[0].(map[string]interface{}); ok {
-					if uri, ok := video["uri"].(string); ok && uri != "" {
-						return uri
-					}
-					if uri, ok := video["Uri"].(string); ok && uri != "" {
-						return uri
-					}
-				}
-			}
+// extractFromGenericMap extracts URI from generic map for unknown formats
+func extractFromGenericMap(resp map[string]interface{}) string {
+	// Format 5: Nested generateVideoResponse format
+	if uri := extractFromGenerateVideoResponse(resp); uri != "" {
+		return uri
+	}
 
-			// Try single video object
-			if video, ok := resp["video"].(map[string]interface{}); ok {
-				if uri, ok := video["uri"].(string); ok && uri != "" {
-					return uri
-				}
-			}
+	// Try direct field name patterns
+	if uri := extractFromDirectFields(resp); uri != "" {
+		return uri
+	}
+
+	// Try videos array
+	if uri := extractFromVideosArray(resp); uri != "" {
+		return uri
+	}
+
+	// Try single video object
+	if uri := extractFromVideoObject(resp); uri != "" {
+		return uri
+	}
+
+	return ""
+}
+
+// extractFromGenerateVideoResponse extracts URI from generateVideoResponse.generatedSamples[0].video.uri
+func extractFromGenerateVideoResponse(resp map[string]interface{}) string {
+	genVideoResp, ok := resp["generateVideoResponse"].(map[string]interface{})
+	if !ok {
+		return ""
+	}
+
+	samples, ok := genVideoResp["generatedSamples"].([]interface{})
+	if !ok || len(samples) == 0 {
+		return ""
+	}
+
+	sample, ok := samples[0].(map[string]interface{})
+	if !ok {
+		return ""
+	}
+
+	video, ok := sample["video"].(map[string]interface{})
+	if !ok {
+		return ""
+	}
+
+	if uri, ok := video["uri"].(string); ok && uri != "" {
+		return uri
+	}
+
+	return ""
+}
+
+// extractFromDirectFields tries various direct field name patterns
+func extractFromDirectFields(resp map[string]interface{}) string {
+	fieldNames := []string{"videoUri", "video_uri", "VideoUri", "VideoURI", "uri"}
+	for _, field := range fieldNames {
+		if uri, ok := resp[field].(string); ok && uri != "" {
+			return uri
 		}
+	}
+	return ""
+}
+
+// extractFromVideosArray extracts URI from videos array
+func extractFromVideosArray(resp map[string]interface{}) string {
+	videos, ok := resp["videos"].([]interface{})
+	if !ok || len(videos) == 0 {
+		return ""
+	}
+
+	video, ok := videos[0].(map[string]interface{})
+	if !ok {
+		return ""
+	}
+
+	if uri, ok := video["uri"].(string); ok && uri != "" {
+		return uri
+	}
+	if uri, ok := video["Uri"].(string); ok && uri != "" {
+		return uri
+	}
+
+	return ""
+}
+
+// extractFromVideoObject extracts URI from single video object
+func extractFromVideoObject(resp map[string]interface{}) string {
+	video, ok := resp["video"].(map[string]interface{})
+	if !ok {
+		return ""
+	}
+
+	if uri, ok := video["uri"].(string); ok && uri != "" {
+		return uri
 	}
 
 	return ""
