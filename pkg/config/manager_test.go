@@ -53,7 +53,7 @@ func TestManager_Load_WithDefaults(t *testing.T) {
 	// Create an empty config file to avoid viper read errors
 	tmpDir := t.TempDir()
 	configPath := filepath.Join(tmpDir, "config.yaml")
-	err := os.WriteFile(configPath, []byte("# empty config\n"), 0644)
+	err := os.WriteFile(configPath, []byte("# empty config\n"), 0600)
 	require.NoError(t, err)
 
 	// Manager should use defaults for empty config
@@ -102,7 +102,7 @@ func TestManager_Save(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Verify file content directly instead of using viper
-	content, err := os.ReadFile(configPath)
+	content, err := os.ReadFile(configPath) // #nosec G304 - test file path
 	require.NoError(t, err)
 
 	configStr := string(content)
@@ -123,7 +123,7 @@ default_duration: 6
 output_directory: "/custom/path"
 poll_interval_seconds: 20
 `
-	err := os.WriteFile(configPath, []byte(configContent), 0644)
+	err := os.WriteFile(configPath, []byte(configContent), 0600)
 	require.NoError(t, err)
 
 	viper.Reset()
@@ -142,12 +142,12 @@ func TestManager_Load_APIKeyFromEnv(t *testing.T) {
 	configPath := filepath.Join(tmpDir, "config.yaml")
 
 	// Create empty config file
-	err := os.WriteFile(configPath, []byte("# empty\n"), 0644)
+	err := os.WriteFile(configPath, []byte("# empty\n"), 0600)
 	require.NoError(t, err)
 
 	// Set environment variable
-	os.Setenv("GEMINI_API_KEY", "env-api-key")
-	defer os.Unsetenv("GEMINI_API_KEY")
+	_ = os.Setenv("GEMINI_API_KEY", "env-api-key")
+	defer func() { _ = os.Unsetenv("GEMINI_API_KEY") }()
 
 	viper.Reset()
 	manager := NewManager(configPath)
@@ -234,7 +234,7 @@ func TestManager_Load_InvalidConfigFile(t *testing.T) {
 	configPath := filepath.Join(tmpDir, "invalid.yaml")
 
 	// Create invalid YAML
-	err := os.WriteFile(configPath, []byte("invalid: yaml: content: ["), 0644)
+	err := os.WriteFile(configPath, []byte("invalid: yaml: content: ["), 0600)
 	require.NoError(t, err)
 
 	viper.Reset()
@@ -253,7 +253,7 @@ func TestManager_Load_EmptyFields(t *testing.T) {
 	configContent := `
 # Empty config to test defaults
 `
-	err := os.WriteFile(configPath, []byte(configContent), 0644)
+	err := os.WriteFile(configPath, []byte(configContent), 0600)
 	require.NoError(t, err)
 
 	viper.Reset()
@@ -279,7 +279,7 @@ func TestManager_Load_PartialConfig(t *testing.T) {
 default_resolution: "1080p"
 default_duration: 6
 `
-	err := os.WriteFile(configPath, []byte(configContent), 0644)
+	err := os.WriteFile(configPath, []byte(configContent), 0600)
 	require.NoError(t, err)
 
 	viper.Reset()

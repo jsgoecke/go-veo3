@@ -185,7 +185,7 @@ func TestValidateVideoFileForExtension(t *testing.T) {
 			name: "valid mp4 file",
 			setup: func() string {
 				path := filepath.Join(tmpDir, "video.mp4")
-				os.WriteFile(path, []byte("fake video content"), 0644)
+				_ = os.WriteFile(path, []byte("fake video content"), 0600)
 				return path
 			},
 			wantErr: false,
@@ -194,7 +194,7 @@ func TestValidateVideoFileForExtension(t *testing.T) {
 			name: "valid mov file",
 			setup: func() string {
 				path := filepath.Join(tmpDir, "video.mov")
-				os.WriteFile(path, []byte("fake video content"), 0644)
+				_ = os.WriteFile(path, []byte("fake video content"), 0600)
 				return path
 			},
 			wantErr: false,
@@ -203,7 +203,7 @@ func TestValidateVideoFileForExtension(t *testing.T) {
 			name: "empty video file",
 			setup: func() string {
 				path := filepath.Join(tmpDir, "empty.mp4")
-				os.WriteFile(path, []byte{}, 0644)
+				_ = os.WriteFile(path, []byte{}, 0600)
 				return path
 			},
 			wantErr: true,
@@ -213,7 +213,7 @@ func TestValidateVideoFileForExtension(t *testing.T) {
 			name: "directory instead of file",
 			setup: func() string {
 				path := filepath.Join(tmpDir, "video_dir")
-				os.Mkdir(path, 0755)
+				_ = os.Mkdir(path, 0750)
 				return path
 			},
 			wantErr: true,
@@ -223,7 +223,7 @@ func TestValidateVideoFileForExtension(t *testing.T) {
 			name: "unsupported format",
 			setup: func() string {
 				path := filepath.Join(tmpDir, "video.avi")
-				os.WriteFile(path, []byte("content"), 0644)
+				_ = os.WriteFile(path, []byte("content"), 0600)
 				return path
 			},
 			wantErr: true,

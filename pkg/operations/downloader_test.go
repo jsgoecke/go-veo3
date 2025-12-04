@@ -39,7 +39,7 @@ func TestDownloader_DownloadVideo(t *testing.T) {
 		w.Header().Set("Content-Type", "video/mp4")
 		w.Header().Set("Content-Length", "1024")
 		w.WriteHeader(http.StatusOK)
-		w.Write(make([]byte, 1024)) // Send 1KB of data
+		_, _ = w.Write(make([]byte, 1024)) // Send 1KB of data
 	}))
 	defer server.Close()
 
@@ -150,7 +150,7 @@ func TestDownloader_DownloadVideoWithRetry(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "video/mp4")
 		w.WriteHeader(http.StatusOK)
-		w.Write(make([]byte, 512))
+		_, _ = w.Write(make([]byte, 512))
 	}))
 	defer server.Close()
 
@@ -304,7 +304,7 @@ func TestVideoInfo_Struct(t *testing.T) {
 func TestDownloader_DownloadVideo_CreatesDirectory(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write(make([]byte, 100))
+		_, _ = w.Write(make([]byte, 100))
 	}))
 	defer server.Close()
 
