@@ -156,10 +156,13 @@ func (p *Processor) worker(ctx context.Context, jobs <-chan BatchJob, results ch
 				Duration:  duration,
 			}
 		} else if result != nil {
-			// Update timing information
-			result.StartTime = startTime
-			result.EndTime = time.Now()
-			result.Duration = duration
+			// Create a copy to avoid modifying the original result
+			// This prevents data races when executors return shared pointers
+			resultCopy := *result
+			resultCopy.StartTime = startTime
+			resultCopy.EndTime = time.Now()
+			resultCopy.Duration = duration
+			result = &resultCopy
 		}
 
 		if result != nil {

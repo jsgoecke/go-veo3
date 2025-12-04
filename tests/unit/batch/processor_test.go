@@ -3,6 +3,7 @@ package batch_test
 import (
 	"context"
 	"errors"
+	"sync"
 	"testing"
 	"time"
 
@@ -186,20 +187,28 @@ func TestProcessManifest_Concurrency(t *testing.T) {
 		ContinueOnError: true,
 	}
 
-	// Track concurrent executions
+	// Track concurrent executions with proper synchronization
 	executing := make(chan bool, 10)
+	var mu sync.Mutex
 	maxConcurrent := 0
 	currentConcurrent := 0
 
 	executor.On("Execute", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
 		executing <- true
+
+		mu.Lock()
 		currentConcurrent++
 		if currentConcurrent > maxConcurrent {
 			maxConcurrent = currentConcurrent
 		}
+		mu.Unlock()
+
 		time.Sleep(10 * time.Millisecond) // Simulate work
+
 		<-executing
+		mu.Lock()
 		currentConcurrent--
+		mu.Unlock()
 	}).Return(&batch.JobResult{Success: true}, nil)
 
 	ctx := context.Background()
@@ -207,7 +216,12 @@ func TestProcessManifest_Concurrency(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Len(t, results, 10)
-	assert.LessOrEqual(t, maxConcurrent, 5, "Should respect concurrency limit")
+
+	mu.Lock()
+	finalMaxConcurrent := maxConcurrent
+	mu.Unlock()
+
+	assert.LessOrEqual(t, finalMaxConcurrent, 5, "Should respect concurrency limit")
 }
 
 func TestProcessManifest_ContextCancellation(t *testing.T) {
